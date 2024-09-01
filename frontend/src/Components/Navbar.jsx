@@ -28,20 +28,20 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+// here i have interchanges the course and aboutus
   const navItems = (
     <>
       <li>
         <a href="/">Home</a>
       </li>
       <li>
-        <a href="/Course">Course</a>
+        <a href="/About">Course</a>
       </li>
       <li>
         <a href="/Contact">Contact</a>
       </li>
       <li>
-        <a href="/About">About Us</a>
+        <a href="/Course">About Us</a>
       </li>
     </>
   );
@@ -87,7 +87,7 @@ function Navbar() {
                 {navItems}
               </ul>
             </div>
-            <a className="text-2xl font-bold cursor-pointer">bookstore</a>
+            <a className="text-2xl font-bold cursor-pointer">MaNGO</a>
           </div>
           <div className="navbar-end space-x-3">
             <div className="navbar-center hidden lg:flex">

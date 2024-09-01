@@ -1,82 +1,27 @@
 [
     {
         "id": 1,
-        "name": "Story Book",
-        "title": "Free Story Books Available",
-        "price": 0,
-        "category": "Free",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
+        "name": "Payal Badal",
+        "image": "/public/Payal_Badal.png"
     },
     {
         "id": 2,
-        "name": "Story Book",
-        "title": "Free Story Books Available",
-        "price": 0,
-        "category": "Free",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
+        "name": "Pranav Sodani",
+        "image": "/public/Pranav_Sodani.png"
     },
     {
         "id": 3,
-        "name": "Jokes Book",
-        "title": "Funny Jokes Book",
-        "price": 10,
-        "category": "Funny",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
+        "name": "Swapnil Joshi",
+        "image": "/public/Swapnil_Joshi.png"
     },
     {
         "id": 4,
-        "name": "Jokes Book",
-        "title": "Funny Jokes Book",
-        "price": 20,
-        "category": "Funny",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
+        "name": "Vishesh Vaidya",
+        "image": "/public/Vishesh_Vaidya.png"
     },
     {
         "id": 5,
-        "name": "Movie Book",
-        "title": "Entertaining Movie Book",
-        "price": 40,
-        "category": "Entertainment",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
-    },
-    {
-        "id": 6,
-        "name": "Movie Book",
-        "title": "Entertaining Movie Book",
-        "price": 210,
-        "category": "Entertainment",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
-    },
-    {
-        "id": 7,
-        "name": "Story Book",
-        "title": "Free Story Books Available",
-        "price": 0,
-        "category": "Free",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
-    },
-    {
-        "id": 8,
-        "name": "Story Book",
-        "title": "Free Story Books Available",
-        "price": 0,
-        "category": "Story",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
-    },
-    {
-        "id": 9,
-        "name": "Food Book",
-        "title": "Cooking and Food Book",
-        "price": 60,
-        "category": "Food",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
-    },
-    {
-        "id": 10,
-        "name": "Story Book",
-        "title": "Free Story Books Available",
-        "price": 0,
-        "category": "Story",
-        "image": "https://img.freepik.com/free-vector/hand-drawn-flat-design-stack-books-illustration_23-2149341898.jpg?w=360"
+        "name": "Pranav Sharma",
+        "image": "/public/Pranav_Sharma.png"
     }
 ]

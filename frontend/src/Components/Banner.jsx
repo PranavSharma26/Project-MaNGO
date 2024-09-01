@@ -6,14 +6,11 @@ function Banner() {
         <div className="w-full order-2 md:order-1 md:w-1/2 mt-12 md:mt-32">
           <div className="space-y-12">
             <h1 className="text-4xl font-bold">
-              Hello,welcome here to learn something{" "}
-              <span className="text-pink-500">new everyday!!!</span>
+            Turn your surplus into someone's smile{" "}
+              <span className="text-pink-500">join us in spreading kindness!!!</span>
             </h1>
             <p className="text-xl">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic,
-              numquam accusantium a magni autem obcaecati, laborum velit
-              doloribus harum sint dolor quisquam aperiam, neque commodi atque
-              ipsa officia deserunt distinctio?
+            "Donating helps those in need and makes a positive impact on your community. Your contributions can provide food, shelter, and essential support to people facing difficult times. It's a simple yet powerful way to make a difference, show kindness, and bring hope to others. Every donation counts and helps build a better, more compassionate world."
             </p>
             <label className="input input-bordered flex items-center gap-2">
               <svg
@@ -31,7 +28,7 @@ function Banner() {
             <button className="btn btn-secondary mt-6">Secondary</button>
         </div>
         <div className="w-full order-1 md:w-1/2">
-        <img src="books.png" className="w-90 h-70 md:mt-20" alt="books" />
+        <img src="ngo.png" className="w-[600px] h-[550px] ml-9 md:mt-20" alt="NGO Image" />
         </div>
       </div>
     </>
