@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend file for Project-MaNGO",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PranavSharma26/Project-MaNGO.git"
+  },
+  "author": "Pranav Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PranavSharma26/Project-MaNGO/issues"
+  },
+  "homepage": "https://github.com/PranavSharma26/Project-MaNGO#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3"
+  }
+}
