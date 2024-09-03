@@ -22,7 +22,7 @@ function Signup() {
       password: data.password,
     };
     await axios
-      .post("http://localhost:4001/user/signup", userInfo)
+      .post("https://mango-backend1.vercel.app/user/signup", userInfo)
       .then((res) => {
         if (res.data) {
           toast.success("Signup Successfully");
