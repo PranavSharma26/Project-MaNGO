@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
-import cors from 'cors'
+import cors from 'cors';
 
 const app = express();
 app.use(cors());
@@ -30,23 +30,39 @@ connection.connect((err) => {
     console.log('Connected to MySQL as ID ' + connection.threadId);
 });
 
-app.post('/user/signup', (req, res) => {
+app.post('/api/register/contributor', (req, res) => {
     console.log("Request body:", req.body);  // Log incoming request data
     const { fullname, email, password } = req.body;
 
-    const query = 'INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO contributors (email, fullname, password) VALUES (?, ?, ?)';
 
-    connection.query(query, [fullname, email, password], (err, results) => {
+    connection.query(query, [email, fullname, password], (err, results) => {
         if (err) {
-            console.error('Error inserting user into database:', err);
+            console.error('Error inserting contributor into database:', err);
             return res.status(500).json({ message: 'Internal server error' });
         }
 
-        console.log("User registered successfully:", results);
-        res.status(201).json({ message: 'User registered successfully', user: { id: results.insertId, fullname, email } });
+        console.log("Contributor registered successfully:", results);
+        res.status(201).json({ message: 'Contributor registered successfully' });
     });
 });
 
+app.post('/api/register/ngo', (req, res) => {
+    console.log("Request body:", req.body);  // Log incoming request data
+    const { fullname, email, password } = req.body;
+
+    const query = 'INSERT INTO ngos (email, fullname, password) VALUES (?, ?, ?)';
+
+    connection.query(query, [email, fullname, password], (err, results) => {
+        if (err) {
+            console.error('Error inserting NGO into database:', err);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+
+        console.log("NGO registered successfully:", results);
+        res.status(201).json({ message: 'NGO registered successfully' });
+    });
+});
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Home Page!');

@@ -1,27 +1,27 @@
 [
     {
         "id": 1,
-        "name": "Payal Badal",
-        "image": "/public/Payal_Badal.png"
+        "name": "Pranav Sharma",
+        "image": "/Pranav_Sharma.png"
     },
     {
         "id": 2,
         "name": "Pranav Sodani",
-        "image": "/public/Pranav_Sodani.png"
+        "image": "/Pranav_Sodani.png"
     },
     {
         "id": 3,
-        "name": "Swapnil Joshi",
-        "image": "/public/Swapnil_Joshi.png"
+        "name": "Vishesh Vaidya",
+        "image": "/Vishesh_Vaidya.png"
     },
     {
         "id": 4,
-        "name": "Vishesh Vaidya",
-        "image": "/public/Vishesh_Vaidya.png"
+        "name": "Swapnil Joshi",
+        "image": "/Swapnil_Joshi.png"
     },
     {
         "id": 5,
-        "name": "Pranav Sharma",
-        "image": "/public/Pranav_Sharma.png"
+        "name": "Payal Badal",
+        "image": "/Payal_Badal.png"
     }
 ]
