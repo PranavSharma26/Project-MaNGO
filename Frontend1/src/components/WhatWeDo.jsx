@@ -1,6 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 function WhatWeDo() {
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  const handleButtonClick = () => {
+    navigate('/register'); // Redirect to the register page
+  };
+
   return (
     <div className="p-4 md:p-8 bg-gray-100 text-center">
       {/* Heading Section */}
@@ -59,7 +66,10 @@ function WhatWeDo() {
         <p className="text-base md:text-lg mb-6">
           Whether you want to volunteer, donate, or simply spread the word, every action helps us create a better world.
         </p>
-        <button className="bg-white text-blue-500 font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-gray-100 transition duration-200">
+        <button 
+          className="bg-white text-blue-500 font-semibold py-2 px-6 rounded-full shadow-lg hover:bg-gray-100 transition duration-200"
+          onClick={handleButtonClick} // Added onClick handler
+        >
           Get Involved
         </button>
       </div>
