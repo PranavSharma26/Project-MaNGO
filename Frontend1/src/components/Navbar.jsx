@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -13,17 +14,32 @@ const Navbar = () => {
       isActive ? 'bg-gray-200' : ''
     }`;
 
+  useEffect(() => {
+    // Simulating login check (Replace with actual authentication logic)
+    const checkLoginStatus = () => {
+      const userLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(userLoggedIn);
+    };
+    checkLoginStatus();
+  }, []);
+
+  const handleLogout = () => {
+    // Clear login status and redirect to home
+    localStorage.setItem('isLoggedIn', 'false');
+    setIsLoggedIn(false);
+    window.location.href = '/';
+  };
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo (Left) */}
           <div className="flex-shrink-0">
-  <NavLink to="/" className="text-xl font-bold bg-gradient-to-r from-pink-600 to-cyan-500 text-transparent bg-clip-text">
-    MaNGO
-  </NavLink>
-</div>
-
+            <NavLink to="/" className="text-xl font-bold bg-gradient-to-r from-pink-600 to-cyan-500 text-transparent bg-clip-text">
+              MaNGO
+            </NavLink>
+          </div>
 
           {/* Desktop Menu (Middle) */}
           <div className="hidden md:flex flex-grow justify-center">
@@ -36,28 +52,44 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Login and Register Buttons (Right) */}
+          {/* Right Section: Conditional (Logged in / Logged out) */}
           <div className="hidden md:flex items-center space-x-4">
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                `bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive ? 'bg-pink-500' : ''
-                }`
-              }
-            >
-              Login
-            </NavLink>
-            <NavLink
-              to="/register"
-              className={({ isActive }) =>
-                `bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive ? 'bg-cyan-400' : ''
-                }`
-              }
-            >
-              Register
-            </NavLink>
+            {isLoggedIn ? (
+              <>
+                <NavLink to="/profile" className="text-gray-700 hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium">
+                  Profile
+                </NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    `bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-sm font-medium ${
+                      isActive ? 'bg-pink-500' : ''
+                    }`
+                  }
+                >
+                  Login
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    `bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-sm font-medium ${
+                      isActive ? 'bg-cyan-400' : ''
+                    }`
+                  }
+                >
+                  Register
+                </NavLink>
+              </>
+            )}
           </div>
 
           {/* Hamburger Menu Icon (Mobile) */}
@@ -131,28 +163,49 @@ const Navbar = () => {
               About Us
             </NavLink>
 
-            <NavLink
-              to="/register"
-              className={({ isActive }) =>
-                `block w-full bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-base font-medium ${
-                  isActive ? 'bg-pink-500' : ''
-                }`
-              }
-              onClick={() => setIsOpen(false)}
-            >
-              Register
-            </NavLink>
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                `block w-full bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-base font-medium ${
-                  isActive ? 'bg-cyan-400' : ''
-                }`
-              }
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </NavLink>
+            {/* Conditional for Mobile - Register/Login OR Profile/Logout */}
+            {isLoggedIn ? (
+              <>
+                <NavLink
+                  to="/profile"
+                  className="block w-full text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Profile
+                </NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    `block w-full bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-base font-medium ${
+                      isActive ? 'bg-pink-500' : ''
+                    }`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
+                </NavLink>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    `block w-full bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-base font-medium ${
+                      isActive ? 'bg-cyan-400' : ''
+                    }`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       )}
