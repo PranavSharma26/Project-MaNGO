@@ -6,10 +6,12 @@ import HowItWorks from './components/HowItWorks';
 import WhatWeDo from './components/WhatWeDo';
 import Gallery from './components/Gallery';
 import AboutUs from './components/AboutUs';
-import Login from './components/Login';
+import Login from './components/login/Login';
 import Register from './components/register/Register';
 import RegisterAsContributor from './components/register/RegisterAsContributor';
 import RegisterAsNGO from './components/register/RegisterAsNGO';
+import LoginAsContributor from './components/login/LoginAsContributor'; // Import the LoginAsContributor component
+import LoginAsNGO from './components/login/LoginAsNGO'; // Import the LoginAsNGO component
 import Footer from './components/Footer'; // Import the Footer component
 
 function App() {
@@ -29,6 +31,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/register/contributor" element={<RegisterAsContributor />} />
           <Route path="/register/ngo" element={<RegisterAsNGO />} />
+          
+          {/* Login routes */}
+          <Route path="/login/contributor" element={<LoginAsContributor />} />
+          <Route path="/login/ngo" element={<LoginAsNGO />} />
         </Routes>
       </main>
       <Footer /> {/* Include the Footer component */}

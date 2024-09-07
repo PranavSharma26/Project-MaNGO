@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function Register() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-[500px] bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <h3 className="text-2xl font-bold mb-6 text-center">Register</h3>
         <div className="space-y-6">
