@@ -10,7 +10,7 @@ function Profile() {
     // Fetch user information
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://your-backend-url/api/profile');
+        const response = await axios.get('http://localhost:4000/api/profile');
         setUser(response.data.user);
       } catch (error) {
         console.error('Error fetching user data:', error);

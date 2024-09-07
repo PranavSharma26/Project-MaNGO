@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
-function LoginAsNGO() {
+function LoginAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data) => {
@@ -12,19 +12,20 @@ function LoginAsNGO() {
     };
 
     try {
-      const response = await axios.post("http://your-backend-url/api/login/ngo", userInfo);
+      const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
       console.log(response.data.message);
       // Redirect to home page or dashboard
       window.location.href = '/'; // Adjust as needed
     } catch (error) {
       console.error("Error logging in:", error);
+      alert('Login failed. Please check your email and password.');
     }
   };
 
   return (
     <div className="min-h-[500px] flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login as NGO</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Login as Contributor</h2>
         
         {/* Email Field */}
         <div className="mb-4">
@@ -52,7 +53,7 @@ function LoginAsNGO() {
         
         <button 
           type="submit" 
-          className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
         >
           Login
         </button>
@@ -61,4 +62,4 @@ function LoginAsNGO() {
   );
 }
 
-export default LoginAsNGO;
+export default LoginAsContributor;

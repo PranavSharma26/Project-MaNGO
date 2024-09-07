@@ -12,12 +12,12 @@ function LoginAsContributor() {
     };
 
     try {
-      const response = await axios.post("http://your-backend-url/api/login/contributor", userInfo);
+      const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
       console.log(response.data.message);
       // Redirect to home page or dashboard
       window.location.href = '/'; // Adjust as needed
     } catch (error) {
-      console.error("Error logging in:", error);
+      console.error("Error logging in:", error.response ? error.response.data : error.message);
     }
   };
 
