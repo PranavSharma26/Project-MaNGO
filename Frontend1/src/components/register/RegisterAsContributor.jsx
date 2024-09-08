@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link } from 'react-router-dom';
 
 function RegisterAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -152,10 +153,16 @@ function RegisterAsContributor() {
           />
           {errors.city && <span className="text-sm text-red-500">This field is required</span>}
         </div>
-
+        <div>
+          <p className="mb-2">
+            <Link to="/login/contributor" className="text-blue-500 hover:underline">
+                Already have an account?
+            </Link>
+          </p>
+        </div>
         <button
           type="submit"
-          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
         >
           Register
         </button>
