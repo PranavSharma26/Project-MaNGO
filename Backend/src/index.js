@@ -36,13 +36,10 @@ connection.connect((err) => {
 app.post('/api/register', async (req, res) => {
     const { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
 
-    // Check if email or contact is already registered
-    const checkQuery = 'SELECT * FROM users WHERE email = ? OR contact = ?';
-    connection.query(checkQuery, [email, contact], async (err, result) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return res.status(500).json({ message: 'Server error' });
-        }
+    try {
+        // Check if email or contact is already registered
+        const checkQuery = 'SELECT * FROM users WHERE email = ? OR contact = ?';
+        const [result] = await connection.promise().query(checkQuery, [email, contact]);
 
         if (result.length > 0) {
             const existingUser = result[0];
@@ -59,27 +56,23 @@ app.post('/api/register', async (req, res) => {
 
         // Insert new user
         const insertQuery = 'INSERT INTO users (user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        connection.query(insertQuery, [user_id, user_type, first_name, middle_name, last_name, contact, email, hashedPassword, address, city], (err, result) => {
-            if (err) {
-                console.error('Error inserting user:', err);
-                return res.status(500).json({ message: 'Server error' });
-            }
-            return res.status(201).json({ message: 'Registration successful' });
-        });
-    });
+        await connection.promise().query(insertQuery, [user_id, user_type, first_name, middle_name, last_name, contact, email, hashedPassword, address, city]);
+
+        return res.status(201).json({ message: 'Registration successful' });
+    } catch (err) {
+        console.error('Error during registration:', err);
+        return res.status(500).json({ message: 'Server error' });
+    }
 });
 
 // Login route for contributors
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
 
-    // Query to find user by email
-    const query = 'SELECT * FROM users WHERE email = ?';
-    connection.query(query, [email], async (err, results) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return res.status(500).json({ message: 'Server error' });
-        }
+    try {
+        // Query to find user by email
+        const query = 'SELECT * FROM users WHERE email = ? AND user_type = "C"';
+        const [results] = await connection.promise().query(query, [email]);
 
         if (results.length === 0) {
             console.log('User not found:', email);
@@ -104,8 +97,54 @@ app.post('/api/login/contributor', async (req, res) => {
 
         // Respond with success and token
         res.status(200).json({ message: 'Login successful', token });
-    });
+    } catch (err) {
+        console.error('Error during contributor login:', err);
+        return res.status(500).json({ message: 'Server error' });
+    }
 });
+
+// Login route for NGOs
+// Login route for NGOs (Updated for debugging)
+// Login route for NGOs with additional debugging
+app.post('/api/login/ngo', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Check if the user exists and is of type 'ngo'
+        const query = 'SELECT * FROM users WHERE email = ? AND user_type = "N"';
+        const [results] = await connection.promise().query(query, [email]);
+
+        if (results.length === 0) {
+            console.log('NGO user not found:', email);  // Log email not found
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const user = results[0];
+        console.log('NGO user found:', user.email);  // Log user found
+
+        // Compare the entered password with the hashed password from the database
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            console.log('Password mismatch for NGO user:', email);  // Log password mismatch
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.user_id, email: user.email },
+            process.env.JWT_SECRET || '1234',
+            { expiresIn: '1h' }
+        );
+
+        // Return token and success message
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (err) {
+        console.error('Error during NGO login:', err);  // Log any other errors
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
 
 // Start the server
 app.listen(port, () => {
