@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
-function LoginAsContributor() {
+function LoginAsNgo() {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data) => {
@@ -12,20 +12,25 @@ function LoginAsContributor() {
     };
 
     try {
-      const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
-      console.log(response.data.message);
-      // Redirect to home page or dashboard
-      window.location.href = '/'; // Adjust as needed
+      const response = await axios.post("http://localhost:4000/api/login/ngo", userInfo);
+      console.log('Login successful:', response.data.message);
+      // Redirect to home page or dashboard after login
+      window.location.href = '/'; // Adjust the path as needed
     } catch (error) {
       console.error("Error logging in:", error);
-      alert('Login failed. Please check your email and password.');
+      // Display the error message for clarity
+      if (error.response && error.response.status === 401) {
+        alert('Invalid email or password.');
+      } else {
+        alert('Login failed. Please try again.');
+      }
     }
   };
 
   return (
     <div className="min-h-[500px] flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login as Contributor</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Login as NGO</h2>
         
         {/* Email Field */}
         <div className="mb-4">
@@ -62,4 +67,4 @@ function LoginAsContributor() {
   );
 }
 
-export default LoginAsContributor;
+export default LoginAsNgo;
