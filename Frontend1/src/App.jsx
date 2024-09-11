@@ -12,6 +12,7 @@ import RegisterAsContributor from './components/register/RegisterAsContributor';
 import RegisterAsNGO from './components/register/RegisterAsNGO';
 import LoginAsContributor from './components/login/LoginAsContributor'; // Import the LoginAsContributor component
 import LoginAsNGO from './components/login/LoginAsNGO'; // Import the LoginAsNGO component
+import NGODashboard from './components/dashboard/NGODashboard'; // Import NGODashboard
 import Footer from './components/Footer'; // Import the Footer component
 
 function App() {
@@ -35,6 +36,9 @@ function App() {
           {/* Login routes */}
           <Route path="/login/contributor" element={<LoginAsContributor />} />
           <Route path="/login/ngo" element={<LoginAsNGO />} />
+          
+          {/* Dashboard routes */}
+          <Route path="/dashboard/ngo" element={<NGODashboard />} /> {/* NGO Dashboard Route */}
         </Routes>
       </main>
       <Footer /> {/* Include the Footer component */}

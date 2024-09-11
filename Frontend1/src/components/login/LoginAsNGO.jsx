@@ -1,9 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import axios from 'axios';
 
 function LoginAsNgo() {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const onSubmit = async (data) => {
     const userInfo = {
@@ -14,8 +16,8 @@ function LoginAsNgo() {
     try {
       const response = await axios.post("http://localhost:4000/api/login/ngo", userInfo);
       console.log('Login successful:', response.data.message);
-      // Redirect to home page or dashboard after login
-      window.location.href = '/'; // Adjust the path as needed
+      // Redirect to NGO dashboard after successful login
+      navigate('/dashboard/ngo'); // Redirect to the NGO dashboard
     } catch (error) {
       console.error("Error logging in:", error);
       // Display the error message for clarity
