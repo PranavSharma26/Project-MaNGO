@@ -1,4 +1,3 @@
-// Import necessary modules
 import express from 'express';
 import dotenv from 'dotenv';
 import mysql from 'mysql2';
@@ -104,8 +103,6 @@ app.post('/api/login/contributor', async (req, res) => {
 });
 
 // Login route for NGOs
-// Login route for NGOs (Updated for debugging)
-// Login route for NGOs with additional debugging
 app.post('/api/login/ngo', async (req, res) => {
     const { email, password } = req.body;
 
@@ -115,38 +112,34 @@ app.post('/api/login/ngo', async (req, res) => {
         const [results] = await connection.promise().query(query, [email]);
 
         if (results.length === 0) {
-            console.log('NGO user not found:', email);  // Log email not found
+            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const user = results[0];
-        console.log('NGO user found:', user.email);  // Log user found
 
-        // Compare the entered password with the hashed password from the database
+        // Verify the password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log('Password mismatch for NGO user:', email);  // Log password mismatch
+            console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Generate JWT token
+        // Generate a JWT token
         const token = jwt.sign(
             { id: user.user_id, email: user.email },
             process.env.JWT_SECRET || '1234',
             { expiresIn: '1h' }
         );
 
-        // Return token and success message
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
-        console.error('Error during NGO login:', err);  // Log any other errors
+        console.error('Error during NGO login:', err);
         return res.status(500).json({ message: 'Server error' });
     }
 });
 
-
-
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
