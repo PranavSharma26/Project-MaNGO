@@ -12,11 +12,8 @@ import RegisterAsContributor from './components/register/RegisterAsContributor';
 import RegisterAsNGO from './components/register/RegisterAsNGO';
 import LoginAsContributor from './components/login/LoginAsContributor'; // Import the LoginAsContributor component
 import LoginAsNGO from './components/login/LoginAsNGO'; // Import the LoginAsNGO component
-<<<<<<< Updated upstream
-=======
 import NGODashboard from './components/dashboard/NGODashboard'; // Import NGODashboard
 import ContributorDashboard from './components/dashboard/ContributorDashboard';
->>>>>>> Stashed changes
 import Footer from './components/Footer'; // Import the Footer component
 
 function App() {
