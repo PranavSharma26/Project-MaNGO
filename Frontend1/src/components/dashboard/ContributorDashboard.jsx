@@ -3,6 +3,7 @@ import { FaDonate, FaHandHoldingHeart, FaDollarSign } from 'react-icons/fa';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import DonateNowImage from '../../../public/DonateNow_MaNGO.png';
 
 function ContributorDashboard() {
   const [showDonateForm, setShowDonateForm] = useState(false);
@@ -12,7 +13,6 @@ function ContributorDashboard() {
     resourceName: '',
     quantity: '',
     consumeTill: '',
-    image: null
   });
 
   const handleInputChange = (e) => {
@@ -20,14 +20,9 @@ function ContributorDashboard() {
     setResourceData({ ...resourceData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
-    setResourceData({ ...resourceData, image: e.target.files[0] });
-  };
-
   const handleFormSubmit = (e) => {
     e.preventDefault();
     console.log('Resource Data:', resourceData);
-    // You can send the data to the server here using axios or fetch
     setShowDonateForm(false);
   };
 
@@ -96,68 +91,80 @@ function ContributorDashboard() {
       {/* Form Overlay */}
       {showDonateForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
-          <div className="relative w-full max-w-lg bg-white p-8 rounded-lg shadow-lg">
+          <form onSubmit={handleFormSubmit} className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative">
+            <h2 className="text-3xl font-bold mb-4">Donate Resource</h2>
+            {/* Resource Name */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="resourceName">Resource Name</label>
+              <input
+                type="text"
+                id="resourceName"
+                name="resourceName"
+                value={resourceData.resourceName}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            {/* Resource Type */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="resourceName">Resource Type</label>
+              <input
+                type="text"
+                id="resourceName"
+                name="resourceName"
+                value={resourceData.resourceType}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            {/* Quantity */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="quantity">Quantity</label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={resourceData.quantity}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            {/* Consume Till */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="consumeTill">Consume Till (Duration)</label>
+              <input
+                type="date"
+                id="consumeTill"
+                name="consumeTill"
+                value={resourceData.consumeTill}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-pink-500 text-white rounded-md hover:bg-blue-500 transition duration-300"
+            >
+              Post!
+            </button>
             <button
               type="button"
               onClick={() => setShowDonateForm(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
             </button>
-            <form onSubmit={handleFormSubmit}>
-              <h2 className="text-3xl font-bold mb-4">Donate Resource</h2>
-              {/* Resource Name */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2" htmlFor="resourceName">Resource Name</label>
-                <input
-                  type="text"
-                  id="resourceName"
-                  name="resourceName"
-                  value={resourceData.resourceName}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-              {/* Quantity */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2" htmlFor="quantity">Quantity</label>
-                <input
-                  type="number"
-                  id="quantity"
-                  name="quantity"
-                  value={resourceData.quantity}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-              {/* Consume Till */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2" htmlFor="consumeTill">Consume Till (Duration)</label>
-                <input
-                  type="date"
-                  id="consumeTill"
-                  name="consumeTill"
-                  value={resourceData.consumeTill}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-              <button type="submit" className="w-full py-2 bg-pink-500 text-white rounded-md hover:bg-blue-600">
-                Post
-              </button>
-            </form>
-          </div>
+          </form>
         </div>
       )}
 
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-4 text-black">
-          How Your Contributions Make an Impact
-        </h2>
+        <h2 className="text-3xl font-bold mb-4 text-black">How Your Contributions Make an Impact</h2>
         <p className="text-base mb-4 text-blue-800">
           Every contribution, be it resources, services, or money, helps NGOs meet their goals and create lasting change.
         </p>
@@ -207,6 +214,14 @@ function ContributorDashboard() {
             )}
           </div>
         </div>
+      </div>
+       {/* Donate Now Image */}
+       <div className="mt-6">
+        <img
+          src={DonateNowImage}
+          alt="Additional Info"
+          className="w-64 h-auto rounded-md shadow-md"
+        />
       </div>
     </div>
   );
