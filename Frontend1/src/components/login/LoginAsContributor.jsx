@@ -49,7 +49,6 @@ function LoginAsContributor() {
           />
           {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
         </div>
-        
         <button 
           type="submit" 
           className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
