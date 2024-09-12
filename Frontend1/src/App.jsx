@@ -40,9 +40,8 @@ function App() {
           
           {/* Dashboard routes */}
           <Route path="/dashboard/ngo" element={<NGODashboard />} /> {/* NGO Dashboard Route */}
+          <Route path="/dashboard/contributor" element={<ContributorDashboard />} /> {/* NGO Dashboard Route */}
           
-          {/* Dashboard routes */}
-          <Route path="/dashboard/ngo" element={<NGODashboard />} /> {/* NGO Dashboard Route */}
         </Routes>
       </main>
       <Footer /> {/* Include the Footer component */}
