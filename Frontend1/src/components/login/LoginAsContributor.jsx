@@ -1,9 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import axios from 'axios';
 
 function LoginAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   const onSubmit = async (data) => {
     const userInfo = {
@@ -14,8 +16,8 @@ function LoginAsContributor() {
     try {
       const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
       console.log(response.data.message);
-      // Redirect to home page or dashboard
-      window.location.href = '/'; // Adjust as needed
+      // Redirect to the contributor dashboard on successful login
+      navigate('/dashboard/contributor'); // Use navigate for redirection
     } catch (error) {
       console.error("Error logging in:", error.response ? error.response.data : error.message);
     }
@@ -49,6 +51,7 @@ function LoginAsContributor() {
           />
           {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
         </div>
+        
         <button 
           type="submit" 
           className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
