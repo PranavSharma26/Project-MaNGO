@@ -1,11 +1,15 @@
+// components/LoginAsContributor.jsx
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext'; 
 
 function LoginAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext); 
 
   const onSubmit = async (data) => {
     const userInfo = {
@@ -15,9 +19,15 @@ function LoginAsContributor() {
 
     try {
       const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
-      console.log(response.data.message);
-      // Redirect to the contributor dashboard on successful login
-      navigate('/dashboard/contributor'); // Use navigate for redirection
+      const { token } = response.data;
+
+      if (token) {
+        login(token); 
+        console.log(response.data.message);
+        navigate('/dashboard/contributor');
+      } else {
+        console.error("No token received");
+      }
     } catch (error) {
       console.error("Error logging in:", error.response ? error.response.data : error.message);
     }
@@ -28,7 +38,6 @@ function LoginAsContributor() {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">Login as Contributor</h2>
         
-        {/* Email Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
           <input 
@@ -40,7 +49,6 @@ function LoginAsContributor() {
           {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
         </div>
         
-        {/* Password Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
           <input 

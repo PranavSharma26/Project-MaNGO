@@ -1,47 +1,27 @@
-import React, { useState, useEffect } from 'react';
+// components/Navbar.jsx
+import React, { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
 
 const Navbar = () => {
+  const { isLoggedIn, logout } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
 
   const getClassName = ({ isActive }) =>
     `text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium ${
       isActive ? 'bg-gray-200' : ''
-    }`;
-
-  useEffect(() => {
-    // Simulating login check (Replace with actual authentication logic)
-    const checkLoginStatus = () => {
-      const userLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(userLoggedIn);
-    };
-    checkLoginStatus();
-  }, []);
-
-  const handleLogout = () => {
-    // Clear login status and redirect to home
-    localStorage.setItem('isLoggedIn', 'false');
-    setIsLoggedIn(false);
-    window.location.href = '/';
-  };
+    }`; 
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo (Left) */}
           <div className="flex-shrink-0">
             <NavLink to="/" className="text-xl font-bold bg-gradient-to-r from-pink-600 to-cyan-500 text-transparent bg-clip-text">
               MaNGO
             </NavLink>
           </div>
 
-          {/* Desktop Menu (Middle) */}
           <div className="hidden md:flex flex-grow justify-center">
             <div className="ml-10 flex items-baseline space-x-4">
               <NavLink to="/" className={getClassName}>Home</NavLink>
@@ -52,7 +32,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right Section: Conditional (Logged in / Logged out) */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <>
@@ -60,7 +39,7 @@ const Navbar = () => {
                   Profile
                 </NavLink>
                 <button
-                  onClick={handleLogout}
+                  onClick={logout}
                   className="bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Logout
@@ -92,9 +71,8 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Hamburger Menu Icon (Mobile) */}
           <div className="flex md:hidden">
-            <button onClick={toggleMenu} type="button" className="text-black hover:text-gray-800 focus:outline-none">
+            <button onClick={() => setIsOpen(!isOpen)} type="button" className="text-black hover:text-gray-800 focus:outline-none">
               <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
@@ -103,7 +81,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-white shadow-md">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
@@ -163,7 +140,6 @@ const Navbar = () => {
               About Us
             </NavLink>
 
-            {/* Conditional for Mobile - Register/Login OR Profile/Logout */}
             {isLoggedIn ? (
               <>
                 <NavLink
@@ -174,7 +150,7 @@ const Navbar = () => {
                   Profile
                 </NavLink>
                 <button
-                  onClick={handleLogout}
+                  onClick={logout}
                   className="block w-full bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Logout
