@@ -1,3 +1,4 @@
+// ContributorDashboard.jsx
 import React from 'react';
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from 'react-icons/fa';
 
@@ -14,7 +15,6 @@ function ContributorDashboard() {
       </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-        
         {/* Donate Resource */}
         <div className="bg-blue-500 text-white p-6 rounded-lg shadow-lg flex items-center space-x-4 hover:bg-blue-600 transition duration-300 cursor-pointer">
           <FaDonate className="text-4xl" />
@@ -41,7 +41,6 @@ function ContributorDashboard() {
             <p className="text-sm">Contribute money directly to NGOs.</p>
           </div>
         </div>
-        
       </div>
 
       {/* Additional Dynamic Content */}

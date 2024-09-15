@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import bcrypt from 'bcrypt'; // bcrypt for password hashing
-import jwt from 'jsonwebtoken'; // jwt for token generation
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 dotenv.config();
@@ -13,7 +13,6 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Create a connection to the database
 const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3306,
@@ -22,7 +21,6 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME || 'REGISTER'
 });
 
-// Connect to the database
 connection.connect((err) => {
     if (err) {
         console.error('Error connecting to the database:', err);
@@ -31,12 +29,10 @@ connection.connect((err) => {
     }
 });
 
-// Register route
 app.post('/api/register', async (req, res) => {
     const { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
 
     try {
-        // Check if email or contact is already registered
         const checkQuery = 'SELECT * FROM users WHERE email = ? OR contact = ?';
         const [result] = await connection.promise().query(checkQuery, [email, contact]);
 
@@ -50,10 +46,7 @@ app.post('/api/register', async (req, res) => {
             }
         }
 
-        // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert new user
         const insertQuery = 'INSERT INTO users (user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         await connection.promise().query(insertQuery, [user_id, user_type, first_name, middle_name, last_name, contact, email, hashedPassword, address, city]);
 
@@ -64,12 +57,10 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Login route for contributors
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Query to find user by email
         const query = 'SELECT * FROM users WHERE email = ? AND user_type = "C"';
         const [results] = await connection.promise().query(query, [email]);
 
@@ -79,22 +70,18 @@ app.post('/api/login/contributor', async (req, res) => {
         }
 
         const user = results[0];
-
-        // Compare provided password with hashed password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Generate a JWT token using the secret key
         const token = jwt.sign(
             { id: user.user_id, email: user.email },
-            process.env.JWT_SECRET || '1234', // Use your JWT_SECRET (or '1234' as a fallback)
+            process.env.JWT_SECRET || '1234',
             { expiresIn: '1h' }
         );
 
-        // Respond with success and token
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
         console.error('Error during contributor login:', err);
@@ -102,12 +89,10 @@ app.post('/api/login/contributor', async (req, res) => {
     }
 });
 
-// Login route for NGOs
 app.post('/api/login/ngo', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Check if the user exists and is of type 'ngo'
         const query = 'SELECT * FROM users WHERE email = ? AND user_type = "N"';
         const [results] = await connection.promise().query(query, [email]);
 
@@ -117,15 +102,12 @@ app.post('/api/login/ngo', async (req, res) => {
         }
 
         const user = results[0];
-
-        // Verify the password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Generate a JWT token
         const token = jwt.sign(
             { id: user.user_id, email: user.email },
             process.env.JWT_SECRET || '1234',
@@ -139,7 +121,6 @@ app.post('/api/login/ngo', async (req, res) => {
     }
 });
 
-// Start the server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
