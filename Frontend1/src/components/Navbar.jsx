@@ -1,4 +1,3 @@
-// components/Navbar.jsx
 import React, { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
@@ -10,7 +9,7 @@ const Navbar = () => {
   const getClassName = ({ isActive }) =>
     `text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium ${
       isActive ? 'bg-gray-200' : ''
-    }`; 
+    }`;
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -39,7 +38,10 @@ const Navbar = () => {
                   Profile
                 </NavLink>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
                   className="bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Logout
@@ -150,7 +152,10 @@ const Navbar = () => {
                   Profile
                 </NavLink>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
                   className="block w-full bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Logout
