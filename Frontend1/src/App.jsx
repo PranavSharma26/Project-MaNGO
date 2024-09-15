@@ -16,8 +16,9 @@ import NGODashboard from './components/dashboard/NGODashboard';
 import ContributorDashboard from './components/dashboard/ContributorDashboard';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-import Logout from './components/Logout'; // Import Logout component
-import { AuthProvider } from './components/context/AuthContext'; // Import AuthProvider
+import Logout from './components/Logout';
+import { AuthProvider } from './components/context/AuthContext';
+import Profile from './components/profile/Profile';
 
 function App() {
   return (
@@ -39,7 +40,8 @@ function App() {
             <Route path="/login/ngo" element={<LoginAsNGO />} />
             <Route path="/dashboard/ngo" element={<ProtectedRoute component={NGODashboard} />} />
             <Route path="/dashboard/contributor" element={<ProtectedRoute component={ContributorDashboard} />} />
-            <Route path="/logout" element={<Logout />} /> {/* Add a route for logout */}
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
         <Footer />

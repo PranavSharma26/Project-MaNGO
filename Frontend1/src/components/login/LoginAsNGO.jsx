@@ -1,11 +1,14 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 function LoginAsNgo() {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
+  const { login } = useContext(AuthContext); // Use AuthContext
 
   const onSubmit = async (data) => {
     const userInfo = {
@@ -15,12 +18,15 @@ function LoginAsNgo() {
 
     try {
       const response = await axios.post("http://localhost:4000/api/login/ngo", userInfo);
-      console.log('Login successful:', response.data.message);
-      // Redirect to NGO dashboard after successful login
-      navigate('/dashboard/ngo'); // Redirect to the NGO dashboard
+      const { token } = response.data;
+
+      if (token) {
+        login(token); // Use context login method
+      } else {
+        alert('No token received.');
+      }
     } catch (error) {
       console.error("Error logging in:", error);
-      // Display the error message for clarity
       if (error.response && error.response.status === 401) {
         alert('Invalid email or password.');
       } else {
@@ -34,7 +40,6 @@ function LoginAsNgo() {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">Login as NGO</h2>
         
-        {/* Email Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
           <input 
@@ -46,7 +51,6 @@ function LoginAsNgo() {
           {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
         </div>
         
-        {/* Password Field */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
           <input 
