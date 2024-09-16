@@ -1,3 +1,4 @@
+// ContributorDashboard.jsx
 import React, { useState } from 'react';
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from 'react-icons/fa';
 import Slider from 'react-slick';
