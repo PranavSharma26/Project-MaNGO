@@ -1,0 +1,31 @@
+/* Ensure to add the hover effect for the card containers */
+.card-hover-content {
+  display: none; /* Hide initially */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  padding: 16px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.card-hover-content .card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.card-hover-content .card img {
+  border-radius: 8px;
+}
+
+.relative:hover .card-hover-content {
+  display: block; /* Show content on hover */
+}
+
+.relative {
+  position: relative; /* Needed for the absolute positioning of hover content */
+}

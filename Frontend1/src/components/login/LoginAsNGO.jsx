@@ -63,7 +63,7 @@ function LoginAsNgo() {
         </div>
         <button 
           type="submit" 
-          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-pink-500"
         >
           Login
         </button>
