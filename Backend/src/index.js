@@ -5,10 +5,13 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import profileRoutes from './routes/profile.js';
 
 const app = express();
 dotenv.config();
 const port = process.env.PORT || 4000;
+
+app.use('/api', profileRoutes);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -88,6 +91,28 @@ app.post('/api/login/contributor', async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
+
+// API route to handle resource form submissions
+app.post('/api/resources', (req, res) => {
+    const { resource_name, resource_type, quantity, unit, duration, time_unit, description } = req.body;
+  
+    const sql = `
+      INSERT INTO resources 
+      (resource_name, resource_type, quantity, unit, duration, time_unit, description) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+  
+    const values = [resource_name, resource_type, quantity, unit, duration, time_unit, description];
+  
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        return res.status(500).send({ message: 'Error inserting resource', error: err });
+      }
+      res.status(201).send({ message: 'Resource added successfully', resource_id: result.insertId });
+    });
+  });
+  
+
 
 app.post('/api/login/ngo', async (req, res) => {
     const { email, password } = req.body;
