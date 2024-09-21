@@ -250,10 +250,18 @@ app.post('/api/login/contributor', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
+        // Insert into Contributor table if not exists
+        const contributorCheckQuery = 'SELECT * FROM Contributor WHERE contributor_id = ?';
+        const [contributorCheckResult] = await connection.promise().query(contributorCheckQuery, [user.user_id]);
+        if (contributorCheckResult.length === 0) {
+            const insertContributorQuery = 'INSERT INTO Contributor (contributor_id) VALUES (?)';
+            await connection.promise().query(insertContributorQuery, [user.user_id]);
+        }
+
         const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || '1234', { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
-        console.error('Error during login:', err);
+        console.error('Error during contributor login:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -266,30 +274,28 @@ app.post('/api/login/ngo', async (req, res) => {
         const query = 'SELECT * FROM users WHERE email = ? AND user_type = "N"';
         const [results] = await connection.promise().query(query, [email]);
 
-        if (results.length === 0) {
-            console.log('User not found:', email);
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
+        if (results.length === 0) return res.status(401).json({ message: 'Invalid email or password' });
 
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            console.log('Password mismatch for user:', email);
-            return res.status(401).json({ message: 'Invalid email or password' });
+        if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
+
+        // Insert into NGO table if not exists
+        const ngoCheckQuery = 'SELECT * FROM NGO WHERE ngo_id = ?';
+        const [ngoCheckResult] = await connection.promise().query(ngoCheckQuery, [user.user_id]);
+        if (ngoCheckResult.length === 0) {
+            const insertNgoQuery = 'INSERT INTO NGO (ngo_id) VALUES (?)';
+            await connection.promise().query(insertNgoQuery, [user.user_id]);
         }
 
-        const token = jwt.sign(
-            { id: user.user_id, email: user.email },
-            process.env.JWT_SECRET || '1234',
-            { expiresIn: '1h' }
-        );
-
+        const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || '1234', { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
         console.error('Error during NGO login:', err);
         return res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 // Fetch User Profile (Using JWT)
 app.get('/api/profile', verifyToken, (req, res) => {
