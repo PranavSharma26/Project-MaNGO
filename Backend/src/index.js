@@ -116,7 +116,7 @@ app.post('/api/login/ngo', async (req, res) => {
 // Fetch User Profile (Using JWT)
 app.get('/api/profile', verifyToken, (req, res) => {
     const userId = req.userId;
-    const query = 'SELECT first_name, contact, address FROM users WHERE user_id = ?';
+    const query = 'SELECT first_name, middle_name, last_name, contact, address FROM users WHERE user_id = ?';
     connection.query(query, [userId], (err, results) => {
         if (err) return res.status(500).json({ error: 'Error fetching profile' });
         if (results.length > 0) res.json(results[0]);
@@ -126,12 +126,12 @@ app.get('/api/profile', verifyToken, (req, res) => {
 
 // Update User Profile
 app.put('/api/profile', verifyToken, (req, res) => {
-    const { name, contact, address } = req.body;
+    const { name, mname, lname, contact, address } = req.body;
     const userId = req.userId;
-    if (!name || !contact || !address) return res.status(400).json({ error: 'All fields are required' });
+    if (!name || !mname || !lname || !contact || !address) return res.status(400).json({ error: 'All fields are required' });
 
-    const query = 'UPDATE users SET first_name = ?, contact = ?, address = ? WHERE user_id = ?';
-    connection.query(query, [name, contact, address, userId], (err, results) => {
+    const query = 'UPDATE users SET first_name = ?, middle_name = ?, last_name = ?, contact = ?, address = ? WHERE user_id = ?';
+    connection.query(query, [name, mname, lname, contact, address, userId], (err, results) => {
         if (err) return res.status(500).json({ error: 'Error updating profile' });
         if (results.affectedRows > 0) res.json({ message: 'Profile updated successfully' });
         else res.status(404).json({ error: 'User not found' });
