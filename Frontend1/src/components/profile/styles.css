@@ -1,0 +1,227 @@
+/* Reset margin and padding for the entire page */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure the body takes up at least the full viewport height */
+}
+
+.navbar {
+    width: 100%;
+    background-color: #007BFF;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center; /* Center the nav-links */
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li {
+    display: inline;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.profile-icon {
+    position: absolute;
+    right: 20px; /* Distance from the right edge */
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile-icon img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    background-color: #fff;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.dropdown-menu a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f4f4f4;
+}
+
+/* Show the dropdown menu on hover */
+.profile-icon:hover .dropdown-menu {
+    display: block;
+}
+
+.profile-container {
+    background-color: #fff;
+    padding: 60px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    margin-top: 100px; /* Adjusted to account for the fixed navbar */
+    margin: 0 auto; /* Center the profile container */
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[disabled] {
+    background-color: #f9f9f9;
+}
+
+/* Style for content sections with background images */
+.content {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff;
+    padding: 40px;
+    text-align: center;
+    flex: 1; /* Allows the content to grow and push the footer to the bottom */
+}
+
+/* Header styling */
+.header {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+/* Footer styling */
+footer {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    width: 100%; /* Ensures the footer covers the full width */
+    margin-top: auto; /* Pushes the footer to the bottom */
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        gap: 10px;
+    }
+}
+
+
+
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        position: static;
+        transform: none;
+        margin-top: 10px;
+    }
+
+    .profile-icon {
+        position: static;
+        margin-left: auto;
+        margin-top: 10px;
+    }
+
+    .profile-container {
+        padding: 15px;
+        margin-top: 120px; /* Adjusted for mobile view */
+    }
+
+    button {
+        padding: 8px 12px;
+    }
+
+    input {
+        padding: 8px;
+    }
+
