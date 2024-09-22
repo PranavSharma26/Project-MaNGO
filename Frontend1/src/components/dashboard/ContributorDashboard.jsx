@@ -3,7 +3,7 @@ import { FaDonate, FaHandHoldingHeart, FaDollarSign } from "react-icons/fa";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import DonateNow_Mango from "../../../public/DonateNow_MaNGO.png";
+// import DonateNow_Mango from "../../../public/DonateNow_MaNGO.png";
 import axios from "axios";
 function ContributorDashboard() {
   const [showDonateForm, setShowDonateForm] = useState(false);
@@ -567,7 +567,7 @@ function ContributorDashboard() {
       {/* Donate Now Image */}
       <div className="mt-6">
         <img
-          src={DonateNow_Mango}
+          src="../public/DonateNow_MaNGO.png"
           alt="Additional Info"
           className="w-64 h-auto rounded-md shadow-md"
         />
