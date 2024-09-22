@@ -13,8 +13,6 @@ function ContributorDashboard() {
   const [hoveringEvents, setHoveringEvents] = useState(false);
   const [showOtherDescription, setShowOtherDescription] = useState(false);
   const [showOtherUnit, setShowOtherUnit] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');  // Track selected category
-  const [selectedDate, setSelectedDate] = useState("");
   
   const [resourceData, setResourceData, setFormData] = useState({
     resource_name: '',
@@ -27,6 +25,7 @@ function ContributorDashboard() {
     quantityUnit: '',
     otherDescription: ''
   });
+  
 
   
   const successStoryImages = [
@@ -68,7 +67,11 @@ function ContributorDashboard() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setResourceData({ ...resourceData, [name]: value }); // Update resourceData state on change
+    setResourceData({ ...resourceData, [name]: value });
+    
+    if (name === 'resource_type') {
+      setShowOtherDescription(value === 'Others');
+    }
   };
   
   const handleFormSubmit = async (e) => {
@@ -83,10 +86,11 @@ function ContributorDashboard() {
         resource_type: resourceData.resource_type,
         quantity: resourceData.quantity,
         unit: resourceData.unit,
-        duration: validDuration,
-        time_unit: resourceData.time_unit,
         description: resourceData.description,
+        duration: validDuration || null,
+        time_unit: resourceData.time_unit || null,
       });
+      setShowDonateForm(false);
       
       console.log("Success:", response.data);
     } catch (err) {
@@ -156,12 +160,9 @@ function ContributorDashboard() {
                 <label className="block text-sm font-medium mb-2" htmlFor="resourceType">Resource Type</label>
                 <select
                   id="resourceType"
-                  name="resourceType"
-                  value={resourceData.resourceType}
-                  onChange={(e) => {
-                    handleInputChange(e);
-                    setShowOtherDescription(e.target.value === 'Others');
-                  }}
+                  name="resource_type" // Update to match your state
+                  value={resourceData.resource_type}
+                  onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
                 >
@@ -172,7 +173,7 @@ function ContributorDashboard() {
                   <option value="Others">Others</option>
                 </select>
               </div>
-  
+
               {showOtherDescription && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-2" htmlFor="otherDescription">Description of resource type</label>
@@ -227,39 +228,54 @@ function ContributorDashboard() {
                     type="text"
                     id="otherUnit"
                     name="otherUnit"
-                    value={resourceData.otherUnit}
+                    value={resourceData.otherUnit || ""}
                     onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
                 </div>
               )}
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2" htmlFor="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                value={resourceData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
   
-              <div className="mb-4 flex gap-2">
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium mb-2" htmlFor="consumeTill">Consume Till</label>
-                  <input
-                    type="date"
-                    id="consumeTill"
-                    name="consumeTill"
-                    value={resourceData.consumeTill}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-  
-                <div className="w-1/2">
-                  <label className="block text-sm font-medium mb-2" htmlFor="consumeTime">Time</label>
-                  <input
-                    type="time"
-                    id="consumeTime"
-                    name="consumeTime"
-                    value={resourceData.consumeTime}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
+            {resourceData.resource_type === 'Food' && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2" htmlFor="consumeTill">Consume Till</label>
+                    <input
+                      type="date"
+                      id="consumeTill"
+                      name="consumeTill"
+                      value={resourceData.consumeTill || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2" htmlFor="consumeTime">Time</label>
+                    <input
+                      type="time"
+                      id="consumeTime"
+                      name="consumeTime"
+                      value={resourceData.consumeTime || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required
+                    />
+                  </div>
+                </>
+              )}
 
             {/* Submit Button */}
             <button
@@ -268,6 +284,14 @@ function ContributorDashboard() {
             >
               Post!
             </button>
+            <button
+              type="button"
+              onClick={() => setShowDonateForm(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              &times;
+            </button>
+            {/* Close button */}
             <button
               type="button"
               onClick={() => setShowDonateForm(false)}
