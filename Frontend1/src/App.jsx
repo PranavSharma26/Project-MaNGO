@@ -19,8 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Logout from './components/Logout';
 import { AuthProvider } from './components/context/AuthContext';
 import Profile from './components/profile/Profile';
-import FoodResources from './components/recources/FoodResources';
-
+import FoodResources from './components/resources/FoodResources';
 
 function App() {
   return (
@@ -43,9 +42,8 @@ function App() {
             <Route path="/dashboard/ngo" element={<ProtectedRoute component={NGODashboard} />} />
             <Route path="/dashboard/contributor" element={<ProtectedRoute component={ContributorDashboard} />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/profile" element={<Profile />} />  
+            <Route path="/profile" element={<Profile />} />
             <Route path="/resources/food" element={<FoodResources />} />
-
           </Routes>
         </main>
         <Footer />

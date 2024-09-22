@@ -1,4 +1,3 @@
-// components/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if the token exists in localStorage on mount
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
@@ -21,13 +19,13 @@ export const AuthProvider = ({ children }) => {
   const login = (token) => {
     localStorage.setItem('token', token);
     setIsLoggedIn(true);
-    navigate('/dashboard/ngo'); // or another default route
+    navigate('/'); // Redirect to Home
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
-    navigate('/login'); // Redirect to login or home page
+    navigate('/login');
   };
 
   return (
