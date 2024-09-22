@@ -31,7 +31,7 @@ function NGODashboard() {
               <NavLink to="/resources/food">
                 <div className="flex flex-col items-center">
                   <img 
-                    src="../../public/Food.png" 
+                    src="/Food.png" 
                     alt="Food" 
                     className="w-32 h-32 object-cover rounded-full mb-4" 
                   />
@@ -46,7 +46,7 @@ function NGODashboard() {
             <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
               <div className="flex flex-col items-center">
                 <img 
-                  src="../../public/clothe.png" 
+                  src="/clothe.png" 
                   alt="Clothes" 
                   className="w-32 h-32 object-cover rounded-full mb-4" 
                 />
@@ -61,7 +61,7 @@ function NGODashboard() {
             <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
               <div className="flex flex-col items-center">
                 <img 
-                  src="../../public/donate.png" 
+                  src="/donate.png" 
                   alt="Other" 
                   className="w-32 h-32 object-cover rounded-full mb-4" 
                 />
