@@ -1,3 +1,4 @@
+// app.js (Backend with Express, MySQL, JWT integration)
 import express from 'express';
 import dotenv from 'dotenv';
 import mysql from 'mysql2';
@@ -32,13 +33,12 @@ connection.connect((err) => {
     }
 });
 
-// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(403).json({ error: 'No token provided' });
 
     jwt.verify(token, process.env.JWT_SECRET || '1234', (err, decoded) => {
-        if (err) return res.status(500).json({ error: 'Failed to authenticate token' });
+        if (err) return res.status(401).json({ error: 'Failed to authenticate token' }); // Changed to 401
         req.userId = decoded.id;
         next();
     });
@@ -92,7 +92,6 @@ app.post('/api/login/contributor', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-
 
 // Login for NGOs
 app.post('/api/login/ngo', async (req, res) => {
@@ -170,48 +169,27 @@ app.put('/api/profile', verifyToken, (req, res) => {
     });
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+// Fetch the NGO
+app.get('/api/ngos', async (req, res) => {
+    const { city } = req.query; // Assuming you're sending city as a query parameter
+    console.log("Received city:", city); 
+    try {
+        const query = `
+            SELECT user_id, first_name, middle_name, last_name, contact, email, address, city 
+            FROM Users 
+            WHERE user_type = 'N' AND city = ?`; // Filter by city
+
+        const [results] = await connection.promise().query(query, [city]);
+        res.status(200).json({ ngos: results });
+    } catch (err) {
+        console.error('Error fetching NGOs:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
