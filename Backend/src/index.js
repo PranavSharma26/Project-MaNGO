@@ -81,8 +81,7 @@
 //     }
 // });
 
-
-// //login as ngo
+// // Login for NGOs
 // app.post('/api/login/ngo', async (req, res) => {
 //     const { email, password } = req.body;
 
@@ -114,6 +113,7 @@
 //         return res.status(500).json({ message: 'Server error' });
 //     }
 // });
+
 // // Fetch User Profile (Using JWT)
 // app.get('/api/profile', verifyToken, (req, res) => {
 //     const userId = req.userId;
@@ -129,10 +129,10 @@
 // app.put('/api/profile', verifyToken, (req, res) => {
 //     const { name, mname, lname, contact, address } = req.body;
 //     const userId = req.userId;
-//     if (!name || !mname || !lname || !contact || !address) return res.status(400).json({ error: 'All fields are required' });
+//     if (!name || !lname || !contact || !address) return res.status(400).json({ error: 'All fields except middle name are required' });
 
 //     const query = 'UPDATE users SET first_name = ?, middle_name = ?, last_name = ?, contact = ?, address = ? WHERE user_id = ?';
-//     connection.query(query, [name, mname, lname, contact, address, userId], (err, results) => {
+//     connection.query(query, [name, mname || null, lname, contact, address, userId], (err, results) => {
 //         if (err) return res.status(500).json({ error: 'Error updating profile' });
 //         if (results.affectedRows > 0) res.json({ message: 'Profile updated successfully' });
 //         else res.status(404).json({ error: 'User not found' });
@@ -142,7 +142,36 @@
 // // Start the server
 // app.listen(port, () => {
 //     console.log(`Server running on http://localhost:${port}`);
-// });   
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -267,23 +296,16 @@ app.post('/api/login/ngo', async (req, res) => {
         const [results] = await connection.promise().query(query, [email]);
 
         if (results.length === 0) {
-            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign(
-            { id: user.user_id, email: user.email },
-            process.env.JWT_SECRET || '1234',
-            { expiresIn: '1h' }
-        );
-
+        const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || '1234', { expiresIn: '1h' });
         res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
         console.error('Error during NGO login:', err);
@@ -316,11 +338,32 @@ app.put('/api/profile', verifyToken, (req, res) => {
     });
 });
 
+// Offer Service
+app.post('/api/service/offer', verifyToken, async (req, res) => {
+    const userId = req.userId; // Get the user ID from the token
+    const { serviceType } = req.body; // Get data from the request body
+
+    // Validate input
+    if (!serviceType) {
+        return res.status(400).json({ message: 'Service type is required' });
+    }
+
+    try {
+        // Insert the service into the Service table
+        const insertQuery = 'INSERT INTO Service (ser_provider_id, type) VALUES (?, ?)';
+        await connection.promise().query(insertQuery, [userId, serviceType]);
+
+        res.status(201).json({ message: 'Service offered successfully' });
+    } catch (err) {
+        console.error('Error offering service:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
-
 
 
 
