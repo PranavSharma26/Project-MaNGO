@@ -20,6 +20,7 @@ import Logout from './components/Logout';
 import { AuthProvider } from './components/context/AuthContext';
 import Profile from './components/profile/Profile';
 import FoodResources from './components/resources/FoodResources';
+import ReviewNGO from './components/dashboard/ReviewNGO';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/login/ngo" element={<LoginAsNGO />} />
             <Route path="/dashboard/ngo" element={<ProtectedRoute component={NGODashboard} />} />
             <Route path="/dashboard/contributor" element={<ProtectedRoute component={ContributorDashboard} />} />
+            <Route path="/review-ngo" element={<ReviewNGO />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/resources/food" element={<FoodResources />} />

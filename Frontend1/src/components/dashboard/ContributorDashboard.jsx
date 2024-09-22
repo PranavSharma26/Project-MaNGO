@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from "react-icons/fa";
 import Slider from "react-slick";
+import { useNavigate } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-// import DonateNow_Mango from "../../../public/DonateNow_MaNGO.png";
+import DonateNow_Mango from "../../../public/DonateNow_MaNGO.png";
 import axios from "axios";
+
 function ContributorDashboard() {
   const [showDonateForm, setShowDonateForm] = useState(false);
   const [showAmountForm, setShowAmountForm] = useState(false);
@@ -30,6 +32,8 @@ function ContributorDashboard() {
     otherUnit: "",
     user_id: null,
   });
+
+  const navigate = useNavigate();
 
   const successStoryImages = [
     {
@@ -60,6 +64,10 @@ function ContributorDashboard() {
       desc: "Clothing donation event on November 5th.",
     },
   ];
+
+  const handleReviewNgo = () => {
+    navigate("/review-ngo"); // Navigate to the review NGO page
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -564,15 +572,32 @@ function ContributorDashboard() {
         </div>
       </div>
 
-      {/* Donate Now Image */}
-      <div className="mt-6">
-        <img
-          src="/DonateNow_Mango.png"
-          alt="Additional Info"
-          className="w-64 h-auto rounded-md shadow-md"
-        />
-      </div>
-    </div>
+      <div className="flex justify-between items-center mt-6">
+  {/* Review Button */}
+  <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-lg mr-6"> {/* Added mr-6 here */}
+    <p className="text-black mb-4 text-sm">
+      Share your thoughts with other contributors!
+    </p>
+    <button
+      onClick={handleReviewNgo}
+      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-4 px-8 rounded-full hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
+    >
+      Review an NGO
+    </button>
+  </div>
+
+  {/* Donate Now Image */}
+  <div>
+    <img
+      src="/DonateNow_Mango.png"
+      alt="Additional Info"
+      className="w-64 h-auto rounded-md shadow-md"
+    />
+  </div>
+</div>
+
+</div>
+
   );
 }
 
