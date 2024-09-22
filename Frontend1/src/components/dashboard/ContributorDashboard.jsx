@@ -26,8 +26,6 @@ function ContributorDashboard() {
     otherDescription: ''
   });
   
-
-  
   const successStoryImages = [
     { img: 'https://tse3.mm.bing.net/th?id=OIP.S1RYMIdyDNicQVd9r8muzwHaFj&pid=Api&P=0&h=180', desc: 'This contribution provided food for 100 families.' },
     { img: 'https://tse2.mm.bing.net/th?id=OIP.-qEn_lM-2cxxSLc0GEg3twHaD4&pid=Api&P=0&h=180', desc: 'Medical aid was delivered to remote areas.' },
@@ -302,24 +300,7 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
+      
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-4 text-black">How Your Contributions Make an Impact</h2>
