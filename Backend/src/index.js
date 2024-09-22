@@ -38,7 +38,7 @@ const verifyToken = (req, res, next) => {
     if (!token) return res.status(403).json({ error: 'No token provided' });
 
     jwt.verify(token, process.env.JWT_SECRET || '1234', (err, decoded) => {
-        if (err) return res.status(401).json({ error: 'Failed to authenticate token' }); // Changed to 401
+        if (err) return res.status(401).json({ error: 'Failed to authenticate token' });
         req.userId = decoded.id;
         next();
     });
@@ -46,10 +46,8 @@ const verifyToken = (req, res, next) => {
 
 // Registration Route
 app.post('/api/register', async (req, res) => {
-    let { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
+    const { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
 
-    // Trim user_id to avoid whitespace issues
-    user_id = user_id.trim();
     try {
         const checkQuery = 'SELECT * FROM users WHERE email = ? OR contact = ?';
         const [result] = await connection.promise().query(checkQuery, [email, contact]);
@@ -57,7 +55,7 @@ app.post('/api/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const insertQuery = 'INSERT INTO users (user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        await connection.promise().query(insertQuery, [user_id, user_type, first_name, middle_name, last_name, contact, email, hashedPassword, address, city]);
+        await connection.promise().query(insertQuery, [user_id.trim(), user_type, first_name, middle_name, last_name, contact, email, hashedPassword, address, city]);
         res.status(201).json({ message: 'Registration successful' });
     } catch (err) {
         console.error('Error during registration:', err);
@@ -77,7 +75,6 @@ app.post('/api/login/contributor', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-        // Insert into Contributor table if not exists
         const contributorCheckQuery = 'SELECT * FROM Contributor WHERE contributor_id = ?';
         const [contributorCheckResult] = await connection.promise().query(contributorCheckQuery, [user.user_id]);
         if (contributorCheckResult.length === 0) {
@@ -86,7 +83,7 @@ app.post('/api/login/contributor', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || '1234', { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful', token, user_id: user.user_id }); // Include user_id here
+        res.status(200).json({ message: 'Login successful', token, user_id: user.user_id });
     } catch (err) {
         console.error('Error during contributor login:', err);
         res.status(500).json({ message: 'Server error' });
@@ -107,7 +104,6 @@ app.post('/api/login/ngo', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-        // Insert into NGO table if not exists
         const ngoCheckQuery = 'SELECT * FROM NGO WHERE ngo_id = ?';
         const [ngoCheckResult] = await connection.promise().query(ngoCheckQuery, [user.user_id]);
         if (ngoCheckResult.length === 0) {
@@ -171,13 +167,12 @@ app.put('/api/profile', verifyToken, (req, res) => {
 
 // Fetch the NGO
 app.get('/api/ngos', async (req, res) => {
-    const { city } = req.query; // Assuming you're sending city as a query parameter
-    console.log("Received city:", city); 
+    const { city } = req.query;
     try {
         const query = `
             SELECT user_id, first_name, middle_name, last_name, contact, email, address, city 
-            FROM Users 
-            WHERE user_type = 'N' AND city = ?`; // Filter by city
+            FROM users 
+            WHERE user_type = 'N' AND city = ?`;
 
         const [results] = await connection.promise().query(query, [city]);
         res.status(200).json({ ngos: results });
@@ -187,7 +182,18 @@ app.get('/api/ngos', async (req, res) => {
     }
 });
 
-
+// Fetch food resources
+app.get('/api/resources/food', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Food';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
 
 // Start the server
 app.listen(port, () => {

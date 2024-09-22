@@ -1,4 +1,4 @@
-import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 function NGODashboard() {
   return (
@@ -28,19 +28,20 @@ function NGODashboard() {
           <div className="flex gap-6">
             {/* Food Card */}
             <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
-              <div className="flex flex-col items-center">
-                <img 
-                  src="../public/Food.png" 
-                  alt="Food" 
-                  className="w-32 h-32 object-cover rounded-full mb-4" 
-                />
-                <h3 className="text-xl font-semibold mb-2">Food</h3>
-                <p className="text-gray-600">
-                  Manage food donations and requests.
-                </p>
-              </div>
+              <NavLink to="/resources/food">
+                <div className="flex flex-col items-center">
+                  <img 
+                    src="../public/Food.png" 
+                    alt="Food" 
+                    className="w-32 h-32 object-cover rounded-full mb-4" 
+                  />
+                  <h3 className="text-xl font-semibold mb-2">Food</h3>
+                  <p className="text-gray-600">Manage food donations and requests.</p>
+                </div>
+              </NavLink>
             </div>
 
+            {/* Other cards ... */}
             {/* Clothes Card */}
             <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
               <div className="flex flex-col items-center">
