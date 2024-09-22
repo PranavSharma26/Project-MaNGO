@@ -19,7 +19,10 @@ function LoginAsContributor() {
 
     try {
       const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
-      const { token } = response.data;
+      
+      const { token, user_id } = response.data;
+      localStorage.setItem('access_token', token);
+      localStorage.setItem('user_id', user_id);
 
       if (token) {
         login(token); 

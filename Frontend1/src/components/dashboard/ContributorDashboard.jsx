@@ -1,31 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from 'react-icons/fa';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import DonateNowImage from '../../../public/DonateNow_MaNGO.png';
+import axios from 'axios';
+
 
 function ContributorDashboard() {
-  const [formData, setFormData] = useState({
-    resourceType: '',
-    quantity: '',
-    duration: '',
-  });
   const [showDonateForm, setShowDonateForm] = useState(false);
   const [hoveringStories, setHoveringStories] = useState(false);
   const [hoveringEvents, setHoveringEvents] = useState(false);
   const [showOtherDescription, setShowOtherDescription] = useState(false);
   const [showOtherUnit, setShowOtherUnit] = useState(false);
-  const [resourceData, setResourceData] = useState({
-    resourceName: '',
-    resourceType: '',
-    otherDescription: '',
-    otherUnit: '',
+  const [selectedCategory, setSelectedCategory] = useState('');  // Track selected category
+  const [selectedDate, setSelectedDate] = useState("");
+  
+  const [resourceData, setResourceData, setFormData] = useState({
+    resource_name: '',
+    resource_type: '',
     quantity: '',
-    quantityUnit: 'pieces',
-    consumeTill: '',
-    consumeTime: '',
+    unit: 'pieces',
+    duration: '',
+    time_unit: '',
+    description: '',
+    quantityUnit: '',
+    otherDescription: ''
   });
+
   
   const successStoryImages = [
     { img: 'https://tse3.mm.bing.net/th?id=OIP.S1RYMIdyDNicQVd9r8muzwHaFj&pid=Api&P=0&h=180', desc: 'This contribution provided food for 100 families.' },
@@ -39,6 +41,19 @@ function ContributorDashboard() {
     { img: 'https://tse2.mm.bing.net/th?id=OIP._-r7BmXelNL7Y16tFyD7_gHaEI&pid=Api&P=0&h=180', desc: 'Clothing donation event on November 5th.' },
   ];
 
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    
+    if (token) {
+      const parsedToken = JSON.parse(atob(token.split('.')[1])); // Assuming JWT token
+      setResourceData((prevData) => ({
+        ...prevData,
+        user_id: parsedToken.user_id, // Assuming user_id is part of the token
+      }));
+    } else {
+      console.error("Access token not found");
+    }
+  }, []);
 
   const sliderSettings = {
     dots: true,
@@ -53,31 +68,30 @@ function ContributorDashboard() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setResourceData({
-      ...resourceData,
-      [name]: value,  // Update resourceData fields dynamically
-    });
+    setResourceData({ ...resourceData, [name]: value }); // Update resourceData state on change
   };
   
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
 
-    const jsonString = JSON.stringify(resourceData);
+    const validDuration = resourceData.duration ? resourceData.duration : null;
 
-    fetch('/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonString,
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+    try {
+      const response = await axios.post("http://localhost:4000/api/resource", {
+        user_id: resourceData.user_id, // now coming from localStorage
+        resource_name: resourceData.resource_name,
+        resource_type: resourceData.resource_type,
+        quantity: resourceData.quantity,
+        unit: resourceData.unit,
+        duration: validDuration,
+        time_unit: resourceData.time_unit,
+        description: resourceData.description,
       });
+      
+      console.log("Success:", response.data);
+    } catch (err) {
+      console.error("Error:", err.response ? err.response.data : err.message);
+    }
   };
 
   return (
@@ -126,12 +140,12 @@ function ContributorDashboard() {
               <h2 className="text-3xl font-bold mb-4">Donate Resource</h2>
   
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-2" htmlFor="resourceName">Resource Name</label>
+                <label className="block text-sm font-medium mb-2" htmlFor="resource_name">Resource Name</label>
                 <input
                   type="text"
-                  id="resourceName"
-                  name="resourceName"
-                  value={resourceData.resourceName}
+                  id="resource_name"
+                  name="resource_name"
+                  value={resourceData.resource_name}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required

@@ -11,11 +11,11 @@ const app = express();
 dotenv.config();
 const port = process.env.PORT || 4000;
 
-app.use('/api', profileRoutes);
-
 app.use(cors());
 app.use(bodyParser.json());
+app.use('/api', profileRoutes);
 
+// MySQL database connection
 const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 3306,
@@ -32,8 +32,12 @@ connection.connect((err) => {
     }
 });
 
+// Register API (no changes needed here)
 app.post('/api/register', async (req, res) => {
-    const { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
+    let { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
+
+    // Trim user_id to avoid whitespace issues
+    user_id = user_id.trim();
 
     try {
         const checkQuery = 'SELECT * FROM users WHERE email = ? OR contact = ?';
@@ -60,6 +64,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+// Contributor Login API
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
 
@@ -68,52 +73,31 @@ app.post('/api/login/contributor', async (req, res) => {
         const [results] = await connection.promise().query(query, [email]);
 
         if (results.length === 0) {
-            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        // Create a JWT token with user_id and email
         const token = jwt.sign(
-            { id: user.user_id, email: user.email },
+            { user_id: user.user_id, email: user.email },
             process.env.JWT_SECRET || '1234',
             { expiresIn: '1h' }
         );
 
-        res.status(200).json({ message: 'Login successful', token });
+        // Return token and user_id
+        res.status(200).json({ message: 'Login successful', token, user_id: user.user_id });
     } catch (err) {
         console.error('Error during contributor login:', err);
         return res.status(500).json({ message: 'Server error' });
     }
 });
 
-// API route to handle resource form submissions
-app.post('/api/resources', (req, res) => {
-    const { resource_name, resource_type, quantity, unit, duration, time_unit, description } = req.body;
-  
-    const sql = `
-      INSERT INTO resources 
-      (resource_name, resource_type, quantity, unit, duration, time_unit, description) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-  
-    const values = [resource_name, resource_type, quantity, unit, duration, time_unit, description];
-  
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        return res.status(500).send({ message: 'Error inserting resource', error: err });
-      }
-      res.status(201).send({ message: 'Resource added successfully', resource_id: result.insertId });
-    });
-  });
-  
-
-
+// NGO Login API
 app.post('/api/login/ngo', async (req, res) => {
     const { email, password } = req.body;
 
@@ -122,28 +106,50 @@ app.post('/api/login/ngo', async (req, res) => {
         const [results] = await connection.promise().query(query, [email]);
 
         if (results.length === 0) {
-            console.log('User not found:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log('Password mismatch for user:', email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        // Create a JWT token with user_id and email
         const token = jwt.sign(
-            { id: user.user_id, email: user.email },
+            { user_id: user.user_id, email: user.email },
             process.env.JWT_SECRET || '1234',
             { expiresIn: '1h' }
         );
 
-        res.status(200).json({ message: 'Login successful', token });
+        // Return token and user_id
+        res.status(200).json({ message: 'Login successful', token, user_id: user.user_id });
     } catch (err) {
         console.error('Error during NGO login:', err);
         return res.status(500).json({ message: 'Server error' });
     }
+});
+
+// API route to handle resource form submissions
+app.post('/api/resource', (req, res) => {
+    const { user_id, resource_name, resource_type, quantity, unit, duration, time_unit, description } = req.body;
+
+    const sql = `
+      INSERT INTO resource 
+      (user_id, resource_name, resource_type, quantity, unit, duration, time_unit, description) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [user_id, resource_name, resource_type, quantity, unit, duration, time_unit, description];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error inserting resource:', err);
+            console.log("user_id:", user_id);
+            return res.status(500).send({ message: 'Error inserting resource', error: err });
+        }
+        res.status(201).send({ message: 'Resource added successfully', resource_id: result.insertId });
+    });
 });
 
 app.listen(port, () => {
