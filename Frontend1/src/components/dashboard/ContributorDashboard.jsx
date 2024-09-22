@@ -303,6 +303,23 @@ function ContributorDashboard() {
         </div>
       )}
 
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-4 text-black">How Your Contributions Make an Impact</h2>

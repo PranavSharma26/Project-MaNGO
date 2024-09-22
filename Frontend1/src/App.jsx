@@ -20,6 +20,7 @@ import Logout from './components/Logout';
 import { AuthProvider } from './components/context/AuthContext';
 import Profile from './components/profile/Profile';
 
+
 function App() {
   return (
     <AuthProvider>
@@ -41,7 +42,7 @@ function App() {
             <Route path="/dashboard/ngo" element={<ProtectedRoute component={NGODashboard} />} />
             <Route path="/dashboard/contributor" element={<ProtectedRoute component={ContributorDashboard} />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile />} />  
           </Routes>
         </main>
         <Footer />
