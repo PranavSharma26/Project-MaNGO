@@ -19,17 +19,20 @@ function LoginAsContributor() {
 
     try {
       const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
-      
       const { token, user_id } = response.data;
-      localStorage.setItem('access_token', token);
-      localStorage.setItem('user_id', user_id);
+      console.log("User ID:", user_id); // Log user_id to check its value
 
-      if (token) {
+      if (token && user_id) {
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('user_id', user_id);
+        
+        console.log("User ID stored:", user_id);
+        console.log("Token stored in localStorage:", localStorage.getItem("access_token"));
+        
         login(token); 
-        console.log(response.data.message);
         navigate('/dashboard/contributor');
       } else {
-        console.error("No token received");
+        console.error("Login failed: No token or user_id received");
       }
     } catch (error) {
       console.error("Error logging in:", error.response ? error.response.data : error.message);

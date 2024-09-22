@@ -66,7 +66,6 @@ app.post('/api/register', async (req, res) => {
 });
 
 // Login for Contributors
-// Contributor Login API
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -87,15 +86,15 @@ app.post('/api/login/contributor', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || '1234', { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({ message: 'Login successful', token, user_id: user.user_id }); // Include user_id here
     } catch (err) {
         console.error('Error during contributor login:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
+
 // Login for NGOs
-// NGO Login API
 app.post('/api/login/ngo', async (req, res) => {
     const { email, password } = req.body;
 
@@ -140,7 +139,6 @@ app.post('/api/resource', (req, res) => {
     connection.query(sql, values, (err, result) => {
         if (err) {
             console.error('Error inserting resource:', err);
-            console.log("user_id:", user_id);
             return res.status(500).send({ message: 'Error inserting resource', error: err });
         }
         res.status(201).send({ message: 'Resource added successfully', resource_id: result.insertId });

@@ -74,12 +74,14 @@ function ContributorDashboard() {
   
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
     const validDuration = resourceData.duration ? resourceData.duration : null;
+    
+    const user_id = localStorage.getItem('user_id');
+    console.log("User ID:", resourceData.user_id); // Log user_id to check its value
 
     try {
       const response = await axios.post("http://localhost:4000/api/resource", {
-        user_id: resourceData.user_id, // now coming from localStorage
+        user_id: user_id, // now coming from localStorage
         resource_name: resourceData.resource_name,
         resource_type: resourceData.resource_type,
         quantity: resourceData.quantity,
@@ -300,7 +302,7 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
-      
+
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-4 text-black">How Your Contributions Make an Impact</h2>
