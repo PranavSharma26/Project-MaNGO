@@ -567,7 +567,7 @@ function ContributorDashboard() {
       {/* Donate Now Image */}
       <div className="mt-6">
         <img
-          src="../../public/DonateNow_MaNGO.png"
+          src="/DonateNow_Mango.png"
           alt="Additional Info"
           className="w-64 h-auto rounded-md shadow-md"
         />
