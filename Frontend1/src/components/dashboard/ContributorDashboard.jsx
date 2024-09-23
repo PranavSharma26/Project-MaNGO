@@ -19,6 +19,8 @@ function ContributorDashboard() {
   const [filteredNgos, setFilteredNgos] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedNgo, setSelectedNgo] = useState(null);
+  const [selectedNgoId, setSelectedNgoId] = useState(null);
+  const [donationAmount, setDonationAmount] = useState(0);
   const [resourceData, setResourceData] = useState({
     resource_name: "",
     resource_type: "",
@@ -64,6 +66,33 @@ function ContributorDashboard() {
       desc: "Clothing donation event on November 5th.",
     },
   ];
+  const handleNgoChange = (ngoId) => {
+    setSelectedNgoId(ngoId);
+  };
+  const handleAmountChange = (e) => {
+    setDonationAmount(e.target.value);
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const token = localStorage.getItem("access_token");
+    const parsedToken = JSON.parse(atob(token.split(".")[1]));
+    const donorId = parsedToken.user_id; // Assuming this maps to your contributor ID
+  
+    const donationData = {
+      donor_id: donorId,
+      ngo_id: selectedNgoId,
+      amount: donationAmount,
+    };
+  
+    try {
+      await axios.post("http://localhost:4000/api/donations", donationData);
+      // Handle successful donation
+    } catch (err) {
+      console.error("Error submitting donation:", err);
+      // Handle error
+    }
+  };
 
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
@@ -83,7 +112,7 @@ function ContributorDashboard() {
       if (!selectedCity) return; // Exit if no city is selected
       try {
         const response = await axios.get(
-          `http:localhost:4000/api/ngos?city=${selectedCity}`
+          `http://localhost:4000/api/ngos?city=${selectedCity}`
         );
         const ngosData = Array.isArray(response.data.ngos)
           ? response.data.ngos
@@ -156,10 +185,31 @@ function ContributorDashboard() {
 
   const handleAmountSubmit = async (e) => {
     e.preventDefault();
-    // Add your logic for submitting the donation amount
-    console.log("Amount donated:", amount);
-    setShowAmountForm(false); // Close the form after submission
-  };
+    const donor_id = resourceData.user_id; // Ensure this is set
+    const ngo_id = selectedNgo; // Ensure this is set
+    const donation_amount = amount;
+    console.log('Donor ID:', donor_id);
+    console.log('NGO ID:', ngo_id);
+    console.log('Donation Amount:', donation_amount);
+
+    // Input validation
+    if (!donor_id || !ngo_id || !donation_amount) {
+        console.error('All fields are required');
+        return;
+    }
+    try {
+        const response = await axios.post('http://localhost:4000/api/donate', {
+            donor_id,
+            ngo_id,
+            donation_amount,
+        });
+        
+        console.log('Donation successful:', response.data);
+        setShowAmountForm(false); // Close the form after submission
+    } catch (err) {
+        console.error('Error submitting donation:', err.response ? err.response.data : err.message);
+    }
+  }; 
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-8 relative">
@@ -412,7 +462,7 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
-      {showAmountForm && (
+       {showAmountForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
           <form
             onSubmit={handleAmountSubmit}
@@ -499,6 +549,8 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
+
+
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-4 text-black">
