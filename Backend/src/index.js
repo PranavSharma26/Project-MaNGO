@@ -194,6 +194,33 @@ app.get('/api/resources/food', (req, res) => {
     });
 });
 
+// Fetch clothes resources
+app.get('/api/resources/clothes', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Clothes';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+// Fetch other resources
+app.get('/api/resources/other', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Other' OR resource_type = 'Toys';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

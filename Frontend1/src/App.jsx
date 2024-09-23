@@ -21,6 +21,8 @@ import { AuthProvider } from './components/context/AuthContext';
 import Profile from './components/profile/Profile';
 import FoodResources from './components/resources/FoodResources';
 import ReviewNGO from './components/dashboard/ReviewNGO';
+import ClothResources from './components/resources/ClothResources';
+import OtherResources from './components/resources/OtherResources';
 
 function App() {
   return (
@@ -46,6 +48,8 @@ function App() {
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/resources/food" element={<FoodResources />} />
+            <Route path="/resources/clothes" element={<ClothResources />} />
+            <Route path="/resources/other" element={<OtherResources />} />
           </Routes>
         </main>
         <Footer />
