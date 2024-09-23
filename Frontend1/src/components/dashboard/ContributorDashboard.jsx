@@ -4,7 +4,6 @@ import Slider from "react-slick";
 import { useNavigate } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import DonateNow_Mango from "../../../public/DonateNow_MaNGO.png";
 import axios from "axios";
 
 function ContributorDashboard() {
