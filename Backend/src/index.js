@@ -14,7 +14,6 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
-
 // MySQL database connection
 const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
@@ -139,6 +138,48 @@ app.post('/api/resource', (req, res) => {
     });
 });
 
+// API route to handle "Give Service" form submissions
+app.post('/api/service', (req, res) => {
+    // const userId = req.userId;
+    const {user_id, timestamp, service_type, description } = req.body;
+
+    const sql = `
+      INSERT INTO service
+      (user_id, timestamp, service_type, description)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    const values = [user_id, timestamp, service_type, description];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error inserting service:', err);
+            return res.status(500).send({ message: 'Error inserting service', error: err });
+        }
+        res.status(201).send({ message: 'Service added successfully', service_id: result.insertId });
+    });
+});
+    // const user_id = req.userId; // Extract user_id from the token
+
+//     if (!type || !description) {
+//         return res.status(400).json({ message: 'Type and description are required' });
+//     }
+
+//     const service_id = `SVC_${Date.now()}`; // Generating a unique service_id
+//     const insertServiceQuery = `
+//         INSERT INTO Service (service_id, user_id, type, description) 
+//         VALUES (?, ?, ?, ?)
+//     `;
+
+//     connection.query(insertServiceQuery, [service_id, user_id, type, description], (err, result) => {
+//         if (err) {
+//             console.error('Error inserting service:', err);
+//             return res.status(500).json({ message: 'Server error' });
+//         }
+//         res.status(201).json({ message: 'Service added successfully', service_id });
+//     });
+// });
+
 // Fetch User Profile (Using JWT)
 app.get('/api/profile', verifyToken, (req, res) => {
     const userId = req.userId;
@@ -176,33 +217,25 @@ router.get('/api/ngosforreview', (req, res) => {
   });
 
 // Fetch the NGO for Donating
+// Fetch the NGOs
 app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
         const query = `
-            SELECT user_id, first_name, middle_name, last_name, contact, email, address, city 
+            SELECT user_id, first_name, middle_name, last_name, contact, email, address, city
             FROM users 
-            WHERE user_type = 'N' AND city = ?`;
-
-        const [results] = await connection.promise().query(query, [city]);
-        res.status(200).json({ ngos: results });
+            WHERE user_type = 'N' ${city ? 'AND city = ?' : ''}
+        `;
+        const [ngos] = await connection.promise().query(query, city ? [city] : []);
+        res.json(ngos);
     } catch (err) {
         console.error('Error fetching NGOs:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Fetch food resources
-app.get('/api/resources/food', (req, res) => {
-    const sql = "SELECT * FROM resource WHERE resource_type = 'Food';";
-    connection.query(sql, (err, result) => {
-        if (err) {
-            console.error("Error fetching resources:", err);
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(result);
-        }
-    });
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
 
 // Fetch clothes resources
@@ -239,3 +272,29 @@ app.listen(port, () => {
 
 
 export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
