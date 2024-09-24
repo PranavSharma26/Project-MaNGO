@@ -403,14 +403,12 @@ function ContributorDashboard() {
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
-
             {resourceData.resource_type === "Food" && (
               <>
                 <div className="mb-4">
                   <label
                     className="block text-sm font-medium mb-2"
-                    htmlFor="consumeTill"
-                  >
+                    htmlFor="consumeTill">
                     Consume Till
                   </label>
                   <input
@@ -420,10 +418,8 @@ function ContributorDashboard() {
                     value={resourceData.consumeTill || ""}
                     onChange={handleInputChange}
                     className="w-full p-2 border border-gray-300 rounded-md"
-                    required
-                  />
+                    required/>
                 </div>
-
                 <div className="mb-4">
                   <label
                     className="block text-sm font-medium mb-2"
@@ -443,7 +439,6 @@ function ContributorDashboard() {
                 </div>
               </>
             )}
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -468,7 +463,6 @@ function ContributorDashboard() {
             className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative"
           >
             <h2 className="text-3xl font-bold mb-4">Donate Amount</h2>
-
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2" htmlFor="city">
                 Select City
@@ -478,8 +472,7 @@ function ContributorDashboard() {
                 value={selectedCity}
                 onChange={handleCityChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              >
+                required>
                 <option value="">Select a city</option>
                 {/* Add options for cities */}
                 <option value="Indore">Indore</option>
@@ -496,13 +489,10 @@ function ContributorDashboard() {
                 {/* Add more cities as needed */}
               </select>
             </div>
-
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-2"
-                htmlFor="amount"
-              >
-                Donation Amount
+                htmlFor="amount">Donation Amount
               </label>
               <input
                 type="number"
@@ -513,7 +503,6 @@ function ContributorDashboard() {
                 required
               />
             </div>
-
             <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Select NGO</label>
             <select
@@ -521,8 +510,7 @@ function ContributorDashboard() {
               value={selectedNgo || ""}
               onChange={(e) => setSelectedNgo(e.target.value)}  // Set selected NGO
               className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            >
+              required>
               <option value="">Select an NGO</option>
               {filteredNgos.map((ngo, index) => (
               <option key={ngo.id || index} value={ngo.id}>
@@ -531,7 +519,6 @@ function ContributorDashboard() {
             ))}
             </select>
           </div>
-
             <button
               type="submit"
               className="w-full py-2 bg-pink-500 text-white rounded-md hover:bg-blue-500 transition duration-300"
@@ -548,8 +535,6 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
-
-
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-4 text-black">
@@ -559,7 +544,6 @@ function ContributorDashboard() {
           Every contribution, be it resources, services, or money, helps NGOs
           meet their goals and create lasting change.
         </p>
-
         <div className="flex flex-col md:flex-row justify-between gap-6">
           {/* Success Stories */}
           <div
@@ -590,7 +574,6 @@ function ContributorDashboard() {
               </div>
             )}
           </div>
-
           {/* Upcoming Events */}
           <div
             className="bg-gray-200 p-4 rounded-lg shadow-md relative"
@@ -622,7 +605,6 @@ function ContributorDashboard() {
           </div>
         </div>
       </div>
-
       <div className="flex justify-between items-center mt-6">
   {/* Review Button */}
   <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-lg mr-6"> {/* Added mr-6 here */}
@@ -631,12 +613,10 @@ function ContributorDashboard() {
     </p>
     <button
       onClick={handleReviewNgo}
-      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-4 px-8 rounded-full hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
-    >
+      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-4 px-8 rounded-full hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out">
       Review an NGO
     </button>
   </div>
-
   {/* Donate Now Image */}
   <div>
     <img
@@ -646,10 +626,7 @@ function ContributorDashboard() {
     />
   </div>
 </div>
-
 </div>
-
   );
 }
-
 export default ContributorDashboard;
