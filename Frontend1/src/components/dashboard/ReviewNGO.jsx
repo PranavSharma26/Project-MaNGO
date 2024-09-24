@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const ReviewNgo = () => {
   const [selectedNgo, setSelectedNgo] = useState('');
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const navigate = useNavigate();
+  const [ngos, setNgos] = useState([]); // To store fetched NGOs
 
   const handleStarHover = (star) => {
     setRating(star);
@@ -18,6 +21,19 @@ const ReviewNgo = () => {
   const handleReviewSubmit = () => {
     // Handle review submit logic here
   };
+
+  useEffect(() => {
+    // Fetch NGOs from the backend
+    axios.get('/api/ngos')
+      .then(response => {
+        setNgos(response.data); // Set NGOs in the state
+      })
+      .catch(error => {
+        console.error('Error fetching NGOs:', error);
+        alert('Failed to load NGOs.');
+      });
+  }, []); // Empty dependency array to fetch on component mount
+
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -41,9 +57,11 @@ const ReviewNgo = () => {
             className="block w-full p-2 border border-gray-300 rounded-md"
           >
             <option value="">-- Select an NGO --</option>
-            <option value="ngo1">NGO 1</option>
-            <option value="ngo2">NGO 2</option>
-            <option value="ngo3">NGO 3</option>
+            {ngos.map((ngo) => (
+              <option key={ngo.id} value={ngo.id}>
+                {ngo.name}
+              </option>
+            ))}
           </select>
         </div>
 

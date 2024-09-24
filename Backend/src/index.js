@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
+const router = express.Router();
 
 dotenv.config();
 const app = express();
@@ -164,7 +164,18 @@ app.put('/api/profile', verifyToken, (req, res) => {
     });
 });
 
-// Fetch the NGO
+// API route to get all NGOs from the database for review
+router.get('/api/ngosforreview', (req, res) => {
+    const sqlQuery = 'SELECT id, name FROM NGO'; // Fetch ID and name of NGOs
+    connection.query(sqlQuery, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json(result); // Send the list of NGOs to the frontend
+    });
+  });
+
+// Fetch the NGO for Donating
 app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -225,3 +236,6 @@ app.get('/api/resources/other', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
+
+export default router;
