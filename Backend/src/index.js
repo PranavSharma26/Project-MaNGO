@@ -217,7 +217,6 @@ router.get('/api/ngosforreview', (req, res) => {
   });
 
 // Fetch the NGO for Donating
-// Fetch the NGOs
 app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -232,10 +231,6 @@ app.get('/api/ngos', async (req, res) => {
         console.error('Error fetching NGOs:', err);
         res.status(500).json({ message: 'Server error' });
     }
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
 });
 
 // Fetch clothes resources

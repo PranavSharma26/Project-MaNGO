@@ -24,9 +24,15 @@ const ReviewNgo = () => {
 
   useEffect(() => {
     // Fetch NGOs from the backend
-    axios.get('/api/ngos')
+    axios.get('http://localhost:4000/api/ngosforreview')
       .then(response => {
-        setNgos(response.data); // Set NGOs in the state
+        console.log('NGO Data:', response.data); // Log the response to inspect the format
+        if (Array.isArray(response.data)) {
+          setNgos(response.data); // Set NGOs in the state if it's an array
+        } else {
+          console.error('Received data is not an array:', response.data);
+          alert('Unexpected data format received from the server.');
+        }
       })
       .catch(error => {
         console.error('Error fetching NGOs:', error);
