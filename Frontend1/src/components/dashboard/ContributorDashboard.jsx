@@ -668,7 +668,7 @@ function ContributorDashboard() {
        How Your Contributions Make an Impact  
       </h2>  
       <p className="text-base mb-4 text-blue-800">  
-       Every contribution, be it       resources, services, or money, helps NGOs meet their goals and create lasting change.  
+       Every contribution, be it resources, services, or money, helps NGOs meet their goals and create lasting change.  
       </p>  
   
       <div className="flex flex-col md:flex-row justify-between gap-6">  
