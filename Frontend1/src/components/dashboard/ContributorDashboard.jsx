@@ -167,11 +167,11 @@ function ContributorDashboard() {
    try {  
     const response = await axios.post("http://localhost:4000/api/resource", {  
       user_id: user_id, // now coming from localStorage  
-      resource_name: resourceData.resource_name,  
+      resource_name: resourceData.resource_name,
       resource_type: resourceData.resource_type,  
       quantity: resourceData.quantity,  
       unit: resourceData.unit,  
-      description: resourceData.description,  
+      description: resourceData.description,
       duration: validDuration || null,  
       time_unit: resourceData.time_unit || null,  
     });  
