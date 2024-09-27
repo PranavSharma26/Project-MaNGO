@@ -235,7 +235,7 @@ app.get('/api/ngos', async (req, res) => {
 
 // Fetch clothes resources
 app.get('/api/resources/clothes', (req, res) => {
-    const sql = "SELECT * FROM resource WHERE resource_type = 'Clothes';";
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Clothes' AND status = 'available';";
     connection.query(sql, (err, result) => {
         if (err) {
             console.error("Error fetching resources:", err);
@@ -246,9 +246,8 @@ app.get('/api/resources/clothes', (req, res) => {
     });
 });
 
-// Fetch other resources
 app.get('/api/resources/other', (req, res) => {
-    const sql = "SELECT * FROM resource WHERE resource_type = 'Other' OR resource_type = 'Toys';";
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Other' OR resource_type = 'Toys' AND status = 'available';";
     connection.query(sql, (err, result) => {
         if (err) {
             console.error("Error fetching resources:", err);
@@ -257,6 +256,27 @@ app.get('/api/resources/other', (req, res) => {
             res.json(result);
         }
     });
+});
+
+// Booking resource route
+app.patch('/api/resources/book/:id', async (req, res) => {
+    const resourceId = req.params.id;
+
+    try {
+        const updateQuery = 'UPDATE resource SET status = ? WHERE resource_id = ? AND status = ?';
+        const values = ['booked', resourceId, 'available'];
+
+        const [result] = await connection.promise().query(updateQuery, values);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Resource not found or already booked' });
+        }
+        
+        res.status(200).json({ message: 'Resource booked successfully' });
+    } catch (error) {
+        console.error('Error booking resource:', error);
+        res.status(500).json({ message: 'Failed to book the resource' });
+    }
 });
 
 

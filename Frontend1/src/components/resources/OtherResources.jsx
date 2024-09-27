@@ -25,6 +25,30 @@ const OtherResources = () => {
         fetchResources();
     }, []);
 
+    const handleBook = async (resourceId) => {
+        const confirmBooking = window.confirm('Are you sure you want to book this resource?');
+        if (!confirmBooking) return;
+
+        try {
+            const response = await fetch(`http://localhost:4000/api/resources/book/${resourceId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to book the resource');
+            }
+
+            // Remove the booked resource from the list
+            setResources(prevResources => prevResources.filter(resource => resource.resource_id !== resourceId));
+        } catch (error) {
+            console.error('Error booking resource:', error);
+            setError(error);
+        }
+    };
+
     if (loading) return <p className="text-center">Loading resources...</p>;
     if (error) return <p className="text-red-500 text-center">Error fetching resources: {error.message}</p>;
 
@@ -40,8 +64,11 @@ const OtherResources = () => {
                             <h3 className="text-lg font-semibold">{resource.resource_name}</h3>
                             <p className="text-gray-700">Quantity: {resource.quantity} {resource.unit}</p>
                             <p className="text-gray-600">{resource.description}</p>
-                            <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200">
-                                Request
+                            <button 
+                                className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200" 
+                                onClick={() => handleBook(resource.resource_id)}
+                            >
+                                Book
                             </button>
                         </div>
                     ))}
