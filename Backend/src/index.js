@@ -64,6 +64,20 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+// Fetch food resources
+app.get('/api/resources/food', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+
 // Login route for contributors
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
