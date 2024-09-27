@@ -9,5 +9,8 @@
     "react-slick": "^0.30.2",
     "recharts": "^2.12.7",
     "slick-carousel": "^1.8.1"
+  },
+  "devDependencies": {
+    "ws": "3.3.2"
   }
 }
