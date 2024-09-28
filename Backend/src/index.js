@@ -6,10 +6,39 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 const router = express.Router();
+import http from 'http';
+import { Server } from 'socket.io';  // For ES Modules
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
+
+
+// for notification server
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
+    }
+});
+
+
+// receiving from Contributor
+
+io.on("connection", (socket) => {
+    // console.log("A user connected");
+
+    socket.on("new_resource", ({ senderName }) => {
+        // Emit a notification to all clients
+        io.emit("resource_posted", {
+            name: senderName, // Make sure to use a consistent key
+        });
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Someone has left");
+    });
+});
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -41,6 +70,27 @@ const verifyToken = (req, res, next) => {
         next();
     });
 };
+
+
+// Endpoint to get user details by user_id
+app.get('/api/users/:user_id', (req, res) => {
+    const userId = req.params.user_id;
+  
+    const sql = `SELECT first_name, last_name FROM users WHERE user_id = ?`;
+    connection.query(sql, [userId], (err, result) => {
+      if (err) {
+        console.error('Error fetching user details:', err);
+        return res.status(500).send({ message: 'Error fetching user details' });
+      }
+      if (result.length === 0) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+  
+      res.status(200).send(result[0]); // Send back first_name and last_name
+    });
+  });
+  
+
 
 // Registration Route
 app.post('/api/register', async (req, res) => {
@@ -281,8 +331,8 @@ app.patch('/api/resources/book/:id', async (req, res) => {
 });
 
 
-// Start the server
-app.listen(port, () => {
+// Start the server with Socket.IO
+server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
