@@ -266,8 +266,7 @@ router.get('/api/ngosforreview', (req, res) => {
     });
   });
 
-// Fetch the NGO for Donating
-app.get('/api/ngos', async (req, res) => {
+  app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
         const query = `
@@ -276,13 +275,13 @@ app.get('/api/ngos', async (req, res) => {
             WHERE user_type = 'N' ${city ? 'AND city = ?' : ''}
         `;
         const [ngos] = await connection.promise().query(query, city ? [city] : []);
+        console.log('NGOs fetched from DB:', ngos);
         res.json(ngos);
     } catch (err) {
         console.error('Error fetching NGOs:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
-
 
 // Fetch clothes resources
 app.get('/api/resources/clothes', (req, res) => {
