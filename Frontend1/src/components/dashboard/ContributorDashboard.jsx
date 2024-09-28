@@ -23,8 +23,6 @@ function ContributorDashboard() {
   const [filteredNgos, setFilteredNgos] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedNgo, setSelectedNgo] = useState(null);
-  const [selectedNgoId, setSelectedNgoId] = useState(null);
-  const [donationAmount, setDonationAmount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [resourceData, setResourceData] = useState({
     resource_name: "",
@@ -79,53 +77,7 @@ function ContributorDashboard() {
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      const parsedToken = JSON.parse(atob(token.split(".")[1]));
-      setResourceData((prevData) => ({
-        ...prevData,
-        user_id: parsedToken.user_id,
-      }));
-    }
-
-    // useEffect(() => {
-    //     const fetchNgos = async () => {
-    //         if (!selectedCity) return; // Exit if no city is selected
-    //         try {
-    //             console.log("Fetching NGOs for city:", selectedCity);
-    //             const response = await axios.get(`http://localhost:4000/api/ngos`, {
-    //                 params: { city: selectedCity }
-    //             });
-    //             const ngosData = Array.isArray(response.data) ? response.data : [];
-    //             console.log("NGOs fetched:", ngosData);
-    //             setFilteredNgos(ngosData); // Set the fetched NGOs
-    //         } catch (err) {
-    //             console.error("Error fetching NGOs:", err);
-    //         }
-    //     };
-    //     fetchNgos(); // Fetch NGOs when component mounts or selectedCity changes
-    // }, [selectedCity]);
-
-    const fetchNgos = async () => {
-      if (!selectedCity) return; // Exit if no city is selected
-      try {
-        const response = await axios.get(
-          `http://localhost:4000/api/ngos?city=${selectedCity}`
-        );
-        const ngosData = Array.isArray(response.data.ngos)
-          ? response.data.ngos
-          : [];
-        setNgos(ngosData);
-        setFilteredNgos(ngosData);
-        console.log("Filtered NGOs:", ngosData);
-      } catch (err) {
-        console.error("Error fetching NGOs:", err);
-      }
-    };
-    fetchNgos(); // Fetch NGOs when component mounts or selectedCity changes
-  }, [selectedCity]); // Dependency array to run effect when selectedCity changes
+  
 
   const sliderSettings = {
     dots: true,
@@ -186,33 +138,37 @@ function ContributorDashboard() {
     }
   };
 
-  const handleCityChange = async (e) => {
-    const city = e.target.value;
-    setSelectedCity(city);
-    console.log("Selected city:", city);
+  // Removed useEffect hook for fetching NGOs
+const handleCityChange = async (e) => {
+  const city = e.target.value;
+  setSelectedCity(city);
+  console.log("Selected city:", city);
 
-    if (!city) {
-      setFilteredNgos([]); // Clear NGO list if no city is selected
-      return;
-    }
+  if (!city) {
+    setFilteredNgos([]); // Clear NGO list if no city is selected
+    return;
+  }
 
-    try {
-      setLoading(true); // Set loading state to true
-      console.log("Fetching NGOs for city:", city);
-      const response = await axios.get("http://localhost:4000/api/ngos", {
-        params: { city },
-      });
-      console.log("NGOs fetched:", response.data);
-      setFilteredNgos(response.data); // Update the filtered NGOs
-    } catch (err) {
-      console.error(
-        "Error fetching NGOs:",
-        err.response ? err.response.data : err.message
-      );
-    } finally {
-      setLoading(false); // Turn off loading state
-    }
-  };
+  try {
+    setLoading(true); // Set loading state to true
+    console.log("Fetching NGOs for city:", city);
+    const response = await axios.get("http://localhost:4000/api/ngos", {
+      params: { city },
+    });
+    console.log("NGOs fetched:", response.data);
+    setFilteredNgos(response.data); // Update the filtered NGOs
+  } catch (err) {
+    console.error(
+      "Error fetching NGOs:",
+      err.response ? err.response.data : err.message
+    );
+  } finally {
+    setLoading(false); // Turn off loading state
+  }
+};
+
+// No need to fetch NGOs inside useEffect anymore.
+
   const handleAmountSubmit = async (e) => {
     e.preventDefault();
     const donor_id = resourceData.user_id; // Ensure this is set
