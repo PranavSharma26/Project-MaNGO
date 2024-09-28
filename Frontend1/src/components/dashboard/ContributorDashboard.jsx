@@ -5,6 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from "axios";
+
+
+import io from 'socket.io-client';
+
+const socket = io("http://localhost:4000");
   
 function ContributorDashboard() {  
   const [showDonateForm, setShowDonateForm] = useState(false);  
@@ -157,32 +162,43 @@ function ContributorDashboard() {
    }  
   };  
   
-  const handleFormSubmit = async (e) => {  
-   e.preventDefault();  
-   const validDuration = resourceData.duration ? resourceData.duration : null;  
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const validDuration = resourceData.duration ? resourceData.duration : null;
   
-   const user_id = localStorage.getItem("user_id");  
-   console.log("User ID:", resourceData.user_id); // Log user_id to check its value  
+    const user_id = localStorage.getItem("user_id");
+    console.log("User ID:", user_id); // Log user_id to check its value
   
-   try {  
-    const response = await axios.post("http://localhost:4000/api/resource", {  
-      user_id: user_id, // now coming from localStorage  
-      resource_name: resourceData.resource_name,
-      resource_type: resourceData.resource_type,  
-      quantity: resourceData.quantity,  
-      unit: resourceData.unit,  
-      description: resourceData.description,
-      duration: validDuration || null,  
-      time_unit: resourceData.time_unit || null,  
-    });  
-    setShowDonateForm(false);  
+    try {
+      // Step 1: Fetch user details (first name, last name) using the user_id
+      const userResponse = await axios.get(`http://localhost:4000/api/users/${user_id}`);
+      const { first_name, last_name } = userResponse.data;
+      const fullName = `${first_name} ${last_name}`;
   
-    console.log("Success:", response.data);  
-   } catch (err) {  
-    console.error("Error:", err.response ? err.response.data : err.message);  
-   }  
-  };  
+      // Step 2: Post the resource details to the server
+      const response = await axios.post("http://localhost:4000/api/resource", {
+        user_id: user_id, // coming from localStorage
+        resource_name: resourceData.resource_name,
+        resource_type: resourceData.resource_type,
+        quantity: resourceData.quantity,
+        unit: resourceData.unit,
+        description: resourceData.description,
+        duration: validDuration || null,
+        time_unit: resourceData.time_unit || null,
+      });
+      
+      setShowDonateForm(false);
+      console.log("Success:", response.data);
+      console.log(fullName);
+      // Step 3: Emit notification to the server with the full name of the person
+      socket.emit("new_resource", { senderName: fullName }); // Wrap the full name in an object
+
   
+    } catch (err) {
+      console.error("Error:", err.response ? err.response.data : err.message);
+    }
+  };
+ 
   const handleCityChange = (e) => {  
    const city = e.target.value;  
    setSelectedCity(city);  
