@@ -19,19 +19,30 @@ const Navbar = () => {
     // Listen for new resource postings
     socket.on('resource_posted', (data) => {
       console.log("Incoming data:", data); // Log the incoming data
-
+      
       // Assuming 'data' is an object and contains a property 'name' for the person's name
       const personName = data.name; // Adjust this according to the actual property that holds the name
-      const notificationMessage = `A new resource has been posted by ${personName}`;
+      const type = data.typeOfContributor;
+      let notificationMessage = ""; // Use 'let' to modify this variable
+    
+      if (type === 1) {
+        notificationMessage = `A new resource has been posted by ${personName}`;
+      } else if (type === 2) {
+        notificationMessage = `A new service has been posted by ${personName}`;
+      } else {
+        notificationMessage = `A new service has been posted by ${personName}`; // Optional else block if other types exist
+      }
+    
       setNotifications((prevNotifications) => [...prevNotifications, notificationMessage]);
     });
+    
   
     return () => {
       socket.off('resource_posted');
     };
   }, []);
 
-  // console.log(notifications);
+  console.log(notifications);
 
   const getClassName = ({ isActive }) =>
     `text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-200' : ''}`;

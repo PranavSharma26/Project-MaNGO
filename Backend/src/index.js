@@ -23,15 +23,15 @@ const io = new Server(server, {
 });
 
 
-// receiving from Contributor
-
+// Notification for resource provider
 io.on("connection", (socket) => {
     // console.log("A user connected");
 
-    socket.on("new_resource", ({ senderName }) => {
+    socket.on("new_resource", ({ senderName, type}) => {
         // Emit a notification to all clients
         io.emit("resource_posted", {
             name: senderName, // Make sure to use a consistent key
+            typeOfContributor: type,
         });
     });
 
@@ -39,6 +39,9 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
+
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -88,7 +91,7 @@ app.get('/api/users/:user_id', (req, res) => {
   
       res.status(200).send(result[0]); // Send back first_name and last_name
     });
-  });
+  });   
   
 
 
