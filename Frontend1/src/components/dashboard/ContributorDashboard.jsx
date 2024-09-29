@@ -19,7 +19,6 @@ function ContributorDashboard() {
   const [showOtherDescription, setShowOtherDescription] = useState(false);
   const [showOtherUnit, setShowOtherUnit] = useState(false);
   const [amount, setAmount] = useState(0);
-  const [ngos, setNgos] = useState([]);
   const [filteredNgos, setFilteredNgos] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedNgo, setSelectedNgo] = useState(null);
@@ -77,7 +76,6 @@ function ContributorDashboard() {
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
-  
 
   const sliderSettings = {
     dots: true,
@@ -169,36 +167,55 @@ const handleCityChange = async (e) => {
 
 // No need to fetch NGOs inside useEffect anymore.
 
-  const handleAmountSubmit = async (e) => {
-    e.preventDefault();
-    const donor_id = resourceData.user_id; // Ensure this is set
-    const ngo_id = selectedNgo; // Ensure this is set
-    const donation_amount = amount;
-    console.log("Donor ID:", donor_id);
-    console.log("NGO ID:", ngo_id);
-    console.log("Donation Amount:", donation_amount);
+const handleAmountSubmit = async (e) => {
+  e.preventDefault();
+  
+  const ngo_id = selectedNgo;
+  const donation_amount = parseFloat(amount); // Convert to number
 
-    // Input validation
-    if (!donor_id || !ngo_id || !donation_amount) {
-      console.error("All fields are required");
+  if (isNaN(donation_amount)) {
+      console.error("Donation amount is invalid");
       return;
-    }
-    try {
+  }
+  if (!ngo_id) {
+      console.error("NGO Id not found");
+      return;
+  }
+
+  try {
+      // Fetch donor ID based on selected NGO
+      const donorResponse = await axios.get(`http://localhost:4000/api/donor/${ngo_id}`);
+      const donor_id = donorResponse.data.donor_id;
+
+      // Validate donor_id
+      if (!donor_id) {
+          console.error("Donor Id not found");
+          return;
+      }
+
+      // Input validation
+      if (!donor_id || !ngo_id || isNaN(donation_amount)) {
+          console.error("All fields are required");
+          return;
+      }
+
       const response = await axios.post("http://localhost:4000/api/donate", {
-        donor_id,
-        ngo_id,
-        donation_amount,
+          donor_id,
+          ngo_id,
+          donation_amount,
       });
 
       console.log("Donation successful:", response.data);
       setShowAmountForm(false); // Close the form after submission
-    } catch (err) {
+  } catch (err) {
       console.error(
-        "Error submitting donation:",
-        err.response ? err.response.data : err.message
+          "Error submitting donation:",
+          err.response ? err.response.data : err.message
       );
-    }
-  };
+  }
+};
+
+
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
