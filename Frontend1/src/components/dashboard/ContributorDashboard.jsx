@@ -130,7 +130,10 @@ function ContributorDashboard() {
       console.log("Success:", response.data);
       console.log(fullName);
       // Step 3: Emit notification to the server with the full name of the person
-      socket.emit("new_resource", { senderName: fullName }); // Wrap the full name in an object
+      socket.emit("new_resource", { 
+        senderName: fullName,
+        type : 1 
+      }); // Wrap the full name in an object
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
     }
@@ -223,6 +226,13 @@ const handleAmountSubmit = async (e) => {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
+         // Step 1: Fetch user details (first name, last name) using the user_id
+         const userResponse = await axios.get(
+          `http://localhost:4000/api/users/${user_id}`
+        );
+        const { first_name, last_name } = userResponse.data;
+        const fullName = `${first_name} ${last_name}`;
+
       const response = await axios.post("http://localhost:4000/api/service", {
         user_id: user_id,
         service_type: serviceData.service_type,
@@ -230,6 +240,14 @@ const handleAmountSubmit = async (e) => {
         description: serviceData.description,
       });
       setShowServiceForm(false);
+      console.log("Success:", response.data);
+      console.log(fullName);
+      // Step 3: Emit notification to the server with the full name of the person
+      socket.emit("new_resource", { 
+        senderName: fullName,
+        type : 2,                               // type of contributor(service, donor, resource provider)
+
+       }); // Wrap the full name in an object
 
       console.log("Success:", response.data);
     } catch (err) {

@@ -9,29 +9,42 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false); // State for dropdown visibility
+  const [hasUnread, setHasUnread] = useState(false); // Track if there are unread notifications
 
   // Socket.io for real-time notifications
-  
-
   useEffect(() => {
     const socket = io("http://localhost:4000"); // Replace with your server address
   
     // Listen for new resource postings
     socket.on('resource_posted', (data) => {
       console.log("Incoming data:", data); // Log the incoming data
-
-      // Assuming 'data' is an object and contains a property 'name' for the person's name
+      
       const personName = data.name; // Adjust this according to the actual property that holds the name
-      const notificationMessage = `A new resource has been posted by ${personName}`;
+      const type = data.typeOfContributor;
+      let notificationMessage = "";
+
+      if (type === 1) {
+        notificationMessage = `A new resource has been posted by ${personName}`;
+      } else if (type === 2) {
+        notificationMessage = `A new service has been posted by ${personName}`;
+      } else {
+        notificationMessage = `A new service has been posted by ${personName}`; // Optional else block
+      }
+
       setNotifications((prevNotifications) => [...prevNotifications, notificationMessage]);
+      setHasUnread(true); // Mark notifications as unread when a new one arrives
     });
-  
+
     return () => {
       socket.off('resource_posted');
     };
   }, []);
 
-  // console.log(notifications);
+  // Toggle the dropdown visibility and mark notifications as read
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+    setHasUnread(false); // Mark all notifications as read
+  };
 
   const getClassName = ({ isActive }) =>
     `text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-gray-200' : ''}`;
@@ -60,12 +73,12 @@ const Navbar = () => {
             {/* Bell icon for notifications */}
             <div className="relative">
               <button
-                onClick={() => setShowDropdown(!showDropdown)} // Toggle dropdown visibility
+                onClick={toggleDropdown} // Toggle dropdown visibility and mark as read
                 className="focus:outline-none"
               >
                 <img src={bellIcon} alt="Bell Icon" className="h-6 w-6" />
                 {/* Notification badge */}
-                {notifications.length > 0 && (
+                {hasUnread && (
                   <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
                 )}
               </button>
