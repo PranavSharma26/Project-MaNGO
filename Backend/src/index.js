@@ -339,25 +339,41 @@ app.post('/api/donate', async (req, res) => {
 });
 
 app.get('/api/donor/:ngo_id', async (req, res) => {
-    const ngo_id = req.params.ngo_id;
-
+    const { ngo_id } = req.params;
+    
     try {
-        const query = `
-            SELECT user_id FROM Donor 
-            WHERE ngo_id = ? 
+        // Check if the NGO exists
+        const ngoQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_id = ? AND user_type = 'N'
         `;
-        const [result] = await connection.promise().query(query, [ngo_id]);
-
-        if (result.length > 0) {
-            res.json({ donor_id: result[0].user_id }); // Send back the donor ID
-        } else {
-            res.status(404).json({ message: 'Donor not found for this NGO' });
+        const [ngoResults] = await connection.promise().query(ngoQuery, [ngo_id]);
+        
+        if (ngoResults.length === 0) {
+            return res.status(404).json({ message: 'NGO not found' });
         }
+        
+        // Fetch the donor ID (which is a contributor)
+        const donorQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_type = 'C' -- Assuming you want to find contributors/donors
+        `;
+        const [donorResults] = await connection.promise().query(donorQuery);
+        
+        if (donorResults.length === 0) {
+            return res.status(404).json({ message: 'Donor not found for this NGO' });
+        }
+        
+        res.json(donorResults); // Return the donor information
     } catch (err) {
         console.error('Error fetching donor:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
 
 // Start the server with Socket.IO
 server.listen(port, () => {
