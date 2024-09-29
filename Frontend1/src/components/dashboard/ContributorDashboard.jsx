@@ -174,10 +174,10 @@ const handleAmountSubmit = async (e) => {
   e.preventDefault();
   
   const ngo_id = selectedNgo;
-  const donation_amount = parseFloat(amount); // Convert to number
+  const donation_amount = parseFloat(amount); 
 
   if (isNaN(donation_amount)) {
-      console.error("Donation amount is invalid");
+      console.error("Donation not found");
       return;
   }
   if (!ngo_id) {
@@ -186,21 +186,9 @@ const handleAmountSubmit = async (e) => {
   }
 
   try {
-      // Fetch donor ID based on selected NGO
+      // Fetch donor_id using the NGO ID
       const donorResponse = await axios.get(`http://localhost:4000/api/donor/${ngo_id}`);
-      const donor_id = donorResponse.data.donor_id;
-
-      // Validate donor_id
-      if (!donor_id) {
-          console.error("Donor Id not found");
-          return;
-      }
-
-      // Input validation
-      if (!donor_id || !ngo_id || isNaN(donation_amount)) {
-          console.error("All fields are required");
-          return;
-      }
+      const donor_id = donorResponse.data[0].user_id; // Assuming donor ID is in the first object
 
       const response = await axios.post("http://localhost:4000/api/donate", {
           donor_id,
@@ -209,16 +197,11 @@ const handleAmountSubmit = async (e) => {
       });
 
       console.log("Donation successful:", response.data);
-      setShowAmountForm(false); // Close the form after submission
+      setShowAmountForm(false);
   } catch (err) {
-      console.error(
-          "Error submitting donation:",
-          err.response ? err.response.data : err.message
-      );
+      console.error("Error submitting donation:", err.response ? err.response.data : err.message);
   }
 };
-
-
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
