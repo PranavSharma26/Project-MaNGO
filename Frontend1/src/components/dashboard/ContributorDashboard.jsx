@@ -212,12 +212,12 @@ const handleAmountSubmit = async (e) => {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
-         // Step 1: Fetch user details (first name, last name) using the user_id
-         const userResponse = await axios.get(
-          `http://localhost:4000/api/users/${user_id}`
-        );
-        const { first_name, last_name } = userResponse.data;
-        const fullName = `${first_name} ${last_name}`;
+        // Step 1: Fetch user details (first name, last name) using the user_id
+      const userResponse = await axios.get(
+        `http://localhost:4000/api/users/${user_id}`
+      );
+      const { first_name, last_name } = userResponse.data;
+      const fullName = `${first_name} ${last_name}`;
 
       const response = await axios.post("http://localhost:4000/api/service", {
         user_id: user_id,
@@ -228,12 +228,12 @@ const handleAmountSubmit = async (e) => {
       setShowServiceForm(false);
       console.log("Success:", response.data);
       console.log(fullName);
-      // Step 3: Emit notification to the server with the full name of the person
+      // Step 3: Emit notification to the server with the full name, type, and user_id
       socket.emit("new_resource", { 
         senderName: fullName,
-        type : 2,                               // type of contributor(service, donor, resource provider)
-
-       }); // Wrap the full name in an object
+        type: 2, // Type of resource (can be dynamic based on your requirement)
+        user_id: user_id // Also send the user_id along with the name and type
+      });
 
       console.log("Success:", response.data);
     } catch (err) {
