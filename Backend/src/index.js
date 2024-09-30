@@ -238,15 +238,21 @@ app.put('/api/profile', verifyToken, (req, res) => {
 
 // API route to get all NGOs from the database for review
 router.get('/api/ngosforreview', (req, res) => {
-    const sqlQuery = 'SELECT id, name FROM NGO'; // Fetch ID and name of NGOs
+    const sqlQuery = `
+      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
+      FROM NGO n
+      JOIN Users u ON n.ngo_id = u.user_id
+      WHERE u.user_type = 'N'
+    `;
+  
     connection.query(sqlQuery, (err, result) => {
       if (err) {
         return res.status(500).json({ error: 'Database query failed' });
       }
-      res.json(result); // Send the list of NGOs to the frontend
+      res.json(result);
     });
   });
-
+  
   app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
