@@ -102,10 +102,10 @@ function ContributorDashboard() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const validDuration = resourceData.duration ? resourceData.duration : null;
-
+  
     const user_id = localStorage.getItem("user_id");
     console.log("User ID:", user_id); // Log user_id to check its value
-
+  
     try {
       // Step 1: Fetch user details (first name, last name) using the user_id
       const userResponse = await axios.get(
@@ -113,7 +113,7 @@ function ContributorDashboard() {
       );
       const { first_name, last_name } = userResponse.data;
       const fullName = `${first_name} ${last_name}`;
-
+  
       // Step 2: Post the resource details to the server
       const response = await axios.post("http://localhost:4000/api/resource", {
         user_id: user_id, // coming from localStorage
@@ -125,19 +125,22 @@ function ContributorDashboard() {
         duration: validDuration || null,
         time_unit: resourceData.time_unit || null,
       });
-
+  
       setShowDonateForm(false);
       console.log("Success:", response.data);
       console.log(fullName);
-      // Step 3: Emit notification to the server with the full name of the person
+  
+      // Step 3: Emit notification to the server with the full name, type, and user_id
       socket.emit("new_resource", { 
         senderName: fullName,
-        type : 1 
-      }); // Wrap the full name in an object
+        type: 1, // Type of resource (can be dynamic based on your requirement)
+        user_id: user_id // Also send the user_id along with the name and type
+      });
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
     }
   };
+  
 
   // Removed useEffect hook for fetching NGOs
 const handleCityChange = async (e) => {
@@ -209,12 +212,12 @@ const handleAmountSubmit = async (e) => {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
-         // Step 1: Fetch user details (first name, last name) using the user_id
-         const userResponse = await axios.get(
-          `http://localhost:4000/api/users/${user_id}`
-        );
-        const { first_name, last_name } = userResponse.data;
-        const fullName = `${first_name} ${last_name}`;
+        // Step 1: Fetch user details (first name, last name) using the user_id
+      const userResponse = await axios.get(
+        `http://localhost:4000/api/users/${user_id}`
+      );
+      const { first_name, last_name } = userResponse.data;
+      const fullName = `${first_name} ${last_name}`;
 
       const response = await axios.post("http://localhost:4000/api/service", {
         user_id: user_id,
@@ -225,12 +228,12 @@ const handleAmountSubmit = async (e) => {
       setShowServiceForm(false);
       console.log("Success:", response.data);
       console.log(fullName);
-      // Step 3: Emit notification to the server with the full name of the person
+      // Step 3: Emit notification to the server with the full name, type, and user_id
       socket.emit("new_resource", { 
         senderName: fullName,
-        type : 2,                               // type of contributor(service, donor, resource provider)
-
-       }); // Wrap the full name in an object
+        type: 2, // Type of resource (can be dynamic based on your requirement)
+        user_id: user_id // Also send the user_id along with the name and type
+      });
 
       console.log("Success:", response.data);
     } catch (err) {
