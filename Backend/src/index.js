@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
 
             // Log the notification ID returned from the server
             const { notification_id } = response.data;
-            console.log('Notification ID:', notification_id);
+            // console.log('Notification ID:', notification_id);
         } catch (err) {
             console.error('Error inserting notification:', err.response ? err.response.data : err.message);
         }
@@ -68,7 +68,6 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
-
 
 
 

@@ -18,11 +18,11 @@ const Navbar = () => {
     // Listen for new resource postings
     socket.on('resource_posted', (data) => {
       console.log("Incoming data:", data); // Log the incoming data
-      
+  
       const personName = data.name; // Adjust this according to the actual property that holds the name
       const type = data.typeOfContributor;
       let notificationMessage = "";
-
+  
       if (type === 1) {
         notificationMessage = `A new resource has been posted by ${personName}`;
       } else if (type === 2) {
@@ -30,15 +30,18 @@ const Navbar = () => {
       } else {
         notificationMessage = `A new service has been posted by ${personName}`; // Optional else block
       }
-
-      setNotifications((prevNotifications) => [...prevNotifications, notificationMessage]);
+  
+      // Prepend new notifications instead of appending
+      setNotifications((prevNotifications) => [notificationMessage, ...prevNotifications]);
+  
       setHasUnread(true); // Mark notifications as unread when a new one arrives
     });
-
+  
     return () => {
       socket.off('resource_posted');
     };
   }, []);
+  
 
   // Toggle the dropdown visibility and mark notifications as read
   const toggleDropdown = () => {
@@ -85,20 +88,33 @@ const Navbar = () => {
 
               {/* Notifications dropdown */}
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification, index) => (
-                      <div key={index} className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200">
-                        {notification}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="px-4 py-2 text-sm text-gray-700">
-                      No new notifications
-                    </div>
-                  )}
-                </div>
-              )}
+  <div className="absolute right-0 mt-2 w-[30rem] bg-white shadow-lg rounded-lg py-2 max-h-64 overflow-y-auto">
+    {notifications.length > 0 ? (
+      notifications.map((notification, index) => (
+        <div key={index} className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200 flex justify-between items-center">
+          <span>{notification}</span>
+          <button
+            className="text-blue-600 hover:text-blue-800 text-sm"
+            onClick={() => showNotificationDetails(notification)} // Handle the click event
+          >
+            Details
+          </button>
+        </div>
+      ))
+    ) : (
+      <div className="px-4 py-2 text-sm text-gray-700">
+        No new notifications
+      </div>
+    )}
+  </div>
+)}
+
+
+
+
+
+
+
             </div>
 
             {isLoggedIn ? (
