@@ -8,6 +8,9 @@ import jwt from 'jsonwebtoken';
 const router = express.Router();
 import http from 'http';
 import { Server } from 'socket.io';  // For ES Modules
+import axios from 'axios'; // Import axios
+
+
 
 dotenv.config();
 const app = express();
@@ -23,16 +26,42 @@ const io = new Server(server, {
 });
 
 
-// Notification for resource provider
+// const axios = require('axios'); // Import axios
+
 io.on("connection", (socket) => {
     // console.log("A user connected");
 
-    socket.on("new_resource", ({ senderName, type}) => {
+    socket.on("new_resource", async ({ senderName, type, user_id }) => {
         // Emit a notification to all clients
         io.emit("resource_posted", {
-            name: senderName, // Make sure to use a consistent key
+            name: senderName,
             typeOfContributor: type,
         });
+
+     // Create the notification message
+    let notificationMessage = "";  // Use 'let' instead of 'const'
+    if (type === 1) {
+        notificationMessage = `${senderName} posted a Resource`;
+    } else if (type === 2) {
+        notificationMessage = `${senderName} posted a Service`;
+    } else {
+        notificationMessage = `${senderName} donated money`;
+    }
+
+
+        // Insert the notification into the database
+        try {
+            const response = await axios.post('http://localhost:4000/api/notification', {
+                user_id,
+                notification_message: notificationMessage,
+            });
+
+            // Log the notification ID returned from the server
+            const { notification_id } = response.data;
+            console.log('Notification ID:', notification_id);
+        } catch (err) {
+            console.error('Error inserting notification:', err.response ? err.response.data : err.message);
+        }
     });
 
     socket.on("disconnect", () => {
@@ -169,6 +198,32 @@ app.post('/api/login/ngo', async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
+
+
+
+// API route to handle notification into table
+app.post('/api/notification', (req, res) => {
+    const { user_id, notification_message } = req.body;
+
+    const sql = `
+      INSERT INTO Notification (user_id, notification_message, created_at) 
+      VALUES (?, ?, NOW())
+    `;
+
+    const values = [user_id, notification_message];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error inserting notification:', err);
+            return res.status(500).send({ message: 'Error inserting notification', error: err });
+        }
+        // The notification_id is the auto-incremented ID from the database
+        res.status(201).send({ message: 'Notification added successfully', notification_id: result.insertId });
+    });
+});
+
+
+
 
 // API route to handle resource form submissions
 app.post('/api/resource', (req, res) => {
