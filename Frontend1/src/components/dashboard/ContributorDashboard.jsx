@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from "react-icons/fa";
 import Slider from "react-slick";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from "axios";
+import io from "socket.io-client";
+const socket = io("http://localhost:4000");
   
 function ContributorDashboard() {  
   const [showDonateForm, setShowDonateForm] = useState(false);  

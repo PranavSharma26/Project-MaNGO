@@ -6,10 +6,42 @@ import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 const router = express.Router();
+import http from 'http';
+import { Server } from 'socket.io';  // For ES Modules
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
+
+
+// for notification server
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
+    }
+});
+
+
+// Notification for resource provider
+io.on("connection", (socket) => {
+    // console.log("A user connected");
+
+    socket.on("new_resource", ({ senderName, type}) => {
+        // Emit a notification to all clients
+        io.emit("resource_posted", {
+            name: senderName, // Make sure to use a consistent key
+            typeOfContributor: type,
+        });
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Someone has left");
+    });
+});
+
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -41,6 +73,27 @@ const verifyToken = (req, res, next) => {
         next();
     });
 };
+
+
+// Endpoint to get user details by user_id
+app.get('/api/users/:user_id', (req, res) => {
+    const userId = req.params.user_id;
+  
+    const sql = `SELECT first_name, last_name FROM users WHERE user_id = ?`;
+    connection.query(sql, [userId], (err, result) => {
+      if (err) {
+        console.error('Error fetching user details:', err);
+        return res.status(500).send({ message: 'Error fetching user details' });
+      }
+      if (result.length === 0) {
+        return res.status(404).send({ message: 'User not found' });
+      }
+  
+      res.status(200).send(result[0]); // Send back first_name and last_name
+    });
+  });   
+  
+
 
 // Registration Route
 app.post('/api/register', async (req, res) => {
@@ -173,28 +226,6 @@ app.post('/api/service', (req, res) => {
         res.status(201).send({ message: 'Service added successfully', service_id: result.insertId });
     });
 });
-    // const user_id = req.userId; // Extract user_id from the token
-
-//     if (!type || !description) {
-//         return res.status(400).json({ message: 'Type and description are required' });
-//     }
-
-//     const service_id = `SVC_${Date.now()}`; // Generating a unique service_id
-//     const insertServiceQuery = `
-//         INSERT INTO Service (service_id, user_id, type, description) 
-//         VALUES (?, ?, ?, ?)
-//     `;
-
-//     connection.query(insertServiceQuery, [service_id, user_id, type, description], (err, result) => {
-//         if (err) {
-//             console.error('Error inserting service:', err);
-//             return res.status(500).json({ message: 'Server error' });
-//         }
-//         res.status(201).json({ message: 'Service added successfully', service_id });
-//     });
-// });
-
-// Fetch User Profile (Using JWT)
 app.get('/api/profile', verifyToken, (req, res) => {
     const userId = req.userId;
     const query = 'SELECT first_name, middle_name, last_name, contact, address FROM users WHERE user_id = ?';
@@ -230,8 +261,7 @@ router.get('/api/ngosforreview', (req, res) => {
     });
   });
 
-// Fetch the NGO for Donating
-app.get('/api/ngos', async (req, res) => {
+  app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
         const query = `
@@ -240,6 +270,7 @@ app.get('/api/ngos', async (req, res) => {
             WHERE user_type = 'N' ${city ? 'AND city = ?' : ''}
         `;
         const [ngos] = await connection.promise().query(query, city ? [city] : []);
+        console.log('NGOs fetched from DB:', ngos);
         res.json(ngos);
     } catch (err) {
         console.error('Error fetching NGOs:', err);
@@ -293,37 +324,57 @@ app.patch('/api/resources/book/:id', async (req, res) => {
     }
 });
 
+app.post('/api/donate', async (req, res) => {
+    const { donor_id, ngo_id, donation_amount } = req.body;
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    // Input validation
+    if (!donor_id) {
+        return res.status(400).json({ message: 'Donor_id not found' });
+    }
+    if (!ngo_id) {
+        return res.status(400).json({ message: 'NGO not found' });
+    }
+    if (!donation_amount) {
+        return res.status(400).json({ message: 'Donation Amount not found' });
+    }
+    try {
+        const query = `
+            INSERT INTO Donations (donor_id, ngo_id, donation_amount)
+            VALUES (?, ?, ?)
+        `;
+        
+        await connection.promise().query(query, [donor_id, ngo_id, donation_amount]);
+        
+        res.status(201).json({ message: 'Donation successfully recorded' });
+    } catch (err) {
+        console.error('Error inserting donation:', err); // Log the error
+        res.status(500).json({ message: 'Server error', error: err.message }); // Include error message in response
+    }
 });
 
+app.get('/api/donor/:ngo_id', async (req, res) => {
+    const ngo_id = req.params.ngo_id;
 
+    try {
+        const query = `
+            SELECT user_id FROM Donor 
+            WHERE ngo_id = ? 
+        `;
+        const [result] = await connection.promise().query(query, [ngo_id]);
+
+        if (result.length > 0) {
+            res.json({ donor_id: result[0].user_id }); // Send back the donor ID
+        } else {
+            res.status(404).json({ message: 'Donor not found for this NGO' });
+        }
+    } catch (err) {
+        console.error('Error fetching donor:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Start the server with Socket.IO
+server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
