@@ -19,6 +19,7 @@
   "homepage": "https://github.com/PranavSharma26/Project-MaNGO#readme",
   "dependencies": {
     "@vercel/node": "^3.2.10",
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",

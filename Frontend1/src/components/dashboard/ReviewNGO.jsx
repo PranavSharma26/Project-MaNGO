@@ -23,24 +23,32 @@ const ReviewNgo = () => {
   };
 
   useEffect(() => {
-    // Fetch NGOs from the backend
-    axios.get('http://localhost:4000/api/ngosforreview')
-      .then(response => {
-        console.log('NGO Data:', response.data); // Log the response to inspect the format
-        if (Array.isArray(response.data)) {
-          setNgos(response.data); // Set NGOs in the state if it's an array
-        } else {
-          console.error('Received data is not an array:', response.data);
-          alert('Unexpected data format received from the server.');
+    let isMounted = true;
+  
+    const fetchNgos = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/ngosforreview');
+        if (isMounted) {
+          console.log('NGO Data:', response.data);
+          if (Array.isArray(response.data)) {
+            setNgos(response.data);
+          } else {
+            alert('Unexpected data format received from the server.');
+          }
         }
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching NGOs:', error);
         alert('Failed to load NGOs.');
-      });
-  }, []); // Empty dependency array to fetch on component mount
-
-
+      }
+    };
+  
+    fetchNgos();
+  
+    return () => {
+      isMounted = false; // Cleanup function to prevent state updates after unmount
+    };
+  }, []);
+  
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">

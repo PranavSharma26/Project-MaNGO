@@ -8,6 +8,9 @@ import jwt from 'jsonwebtoken';
 const router = express.Router();
 import http from 'http';
 import { Server } from 'socket.io';  // For ES Modules
+import axios from 'axios'; // Import axios
+
+
 
 dotenv.config();
 const app = express();
@@ -23,23 +26,48 @@ const io = new Server(server, {
 });
 
 
-// Notification for resource provider
+// const axios = require('axios'); // Import axios
+
 io.on("connection", (socket) => {
     // console.log("A user connected");
 
-    socket.on("new_resource", ({ senderName, type}) => {
+    socket.on("new_resource", async ({ senderName, type, user_id }) => {
         // Emit a notification to all clients
         io.emit("resource_posted", {
-            name: senderName, // Make sure to use a consistent key
+            name: senderName,
             typeOfContributor: type,
         });
+
+     // Create the notification message
+    let notificationMessage = "";  // Use 'let' instead of 'const'
+    if (type === 1) {
+        notificationMessage = `${senderName} posted a Resource`;
+    } else if (type === 2) {
+        notificationMessage = `${senderName} posted a Service`;
+    } else {
+        notificationMessage = `${senderName} donated money`;
+    }
+
+
+        // Insert the notification into the database
+        try {
+            const response = await axios.post('http://localhost:4000/api/notification', {
+                user_id,
+                notification_message: notificationMessage,
+            });
+
+            // Log the notification ID returned from the server
+            const { notification_id } = response.data;
+            // console.log('Notification ID:', notification_id);
+        } catch (err) {
+            console.error('Error inserting notification:', err.response ? err.response.data : err.message);
+        }
     });
 
     socket.on("disconnect", () => {
         console.log("Someone has left");
     });
 });
-
 
 
 
@@ -184,6 +212,32 @@ app.post('/api/login/ngo', async (req, res) => {
     }
 });
 
+
+
+// API route to handle notification into table
+app.post('/api/notification', (req, res) => {
+    const { user_id, notification_message } = req.body;
+
+    const sql = `
+      INSERT INTO Notification (user_id, notification_message, created_at) 
+      VALUES (?, ?, NOW())
+    `;
+
+    const values = [user_id, notification_message];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error inserting notification:', err);
+            return res.status(500).send({ message: 'Error inserting notification', error: err });
+        }
+        // The notification_id is the auto-incremented ID from the database
+        res.status(201).send({ message: 'Notification added successfully', notification_id: result.insertId });
+    });
+});
+
+
+
+
 // API route to handle resource form submissions
 app.post('/api/resource', (req, res) => {
     const { user_id, resource_name, resource_type, quantity, unit, duration, time_unit, description } = req.body;
@@ -252,15 +306,21 @@ app.put('/api/profile', verifyToken, (req, res) => {
 
 // API route to get all NGOs from the database for review
 router.get('/api/ngosforreview', (req, res) => {
-    const sqlQuery = 'SELECT id, name FROM NGO'; // Fetch ID and name of NGOs
+    const sqlQuery = `
+      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
+      FROM NGO n
+      JOIN Users u ON n.ngo_id = u.user_id
+      WHERE u.user_type = 'N'
+    `;
+  
     connection.query(sqlQuery, (err, result) => {
       if (err) {
         return res.status(500).json({ error: 'Database query failed' });
       }
-      res.json(result); // Send the list of NGOs to the frontend
+      res.json(result);
     });
   });
-
+  
   app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -353,25 +413,41 @@ app.post('/api/donate', async (req, res) => {
 });
 
 app.get('/api/donor/:ngo_id', async (req, res) => {
-    const ngo_id = req.params.ngo_id;
-
+    const { ngo_id } = req.params;
+    
     try {
-        const query = `
-            SELECT user_id FROM Donor 
-            WHERE ngo_id = ? 
+        // Check if the NGO exists
+        const ngoQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_id = ? AND user_type = 'N'
         `;
-        const [result] = await connection.promise().query(query, [ngo_id]);
-
-        if (result.length > 0) {
-            res.json({ donor_id: result[0].user_id }); // Send back the donor ID
-        } else {
-            res.status(404).json({ message: 'Donor not found for this NGO' });
+        const [ngoResults] = await connection.promise().query(ngoQuery, [ngo_id]);
+        
+        if (ngoResults.length === 0) {
+            return res.status(404).json({ message: 'NGO not found' });
         }
+        
+        // Fetch the donor ID (which is a contributor)
+        const donorQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_type = 'C' -- Assuming you want to find contributors/donors
+        `;
+        const [donorResults] = await connection.promise().query(donorQuery);
+        
+        if (donorResults.length === 0) {
+            return res.status(404).json({ message: 'Donor not found for this NGO' });
+        }
+        
+        res.json(donorResults); // Return the donor information
     } catch (err) {
         console.error('Error fetching donor:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
 
 // Start the server with Socket.IO
 server.listen(port, () => {
