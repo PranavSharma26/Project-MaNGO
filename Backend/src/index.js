@@ -303,24 +303,6 @@ app.put('/api/profile', verifyToken, (req, res) => {
         else res.status(404).json({ error: 'User not found' });
     });
 });
-
-// API route to get all NGOs from the database for review
-router.get('/api/ngosforreview', (req, res) => {
-    const sqlQuery = `
-      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
-      FROM NGO n
-      JOIN Users u ON n.ngo_id = u.user_id
-      WHERE u.user_type = 'N'
-    `;
-  
-    connection.query(sqlQuery, (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-      res.json(result);
-    });
-  });
-  
   app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -447,7 +429,48 @@ app.get('/api/donor/:ngo_id', async (req, res) => {
     }
 });
 
-
+// API route to get all NGOs from the database for review
+router.get('/api/ngosforreview', (req, res) => {
+    const sqlQuery = `
+      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
+      FROM NGO n
+      JOIN Users u ON n.ngo_id = u.user_id
+      WHERE u.user_type = 'N'
+    `;
+  
+    connection.query(sqlQuery, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json(result);
+    });
+  });
+  
+router.post('/api/review', async (req, res) => {
+    const { ngoId, rating, review } = req.body;
+    const userId = req.userId; // Get userId from JWT token
+    
+    try {
+      // Generate a unique review_id (you can use a library like uuid for this)
+      const reviewId = generateUniqueId(); // Implement this function as needed
+  
+      // Insert review into the database
+      const result = await db.query(
+        'INSERT INTO Review (review_id, contributor_id, ngo_id, description) VALUES (?, ?, ?, ?)',
+        [reviewId, userId, ngoId, review] // Update to match your table structure
+      );
+  
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'Review submitted successfully!' });
+      } else {
+        res.status(500).json({ message: 'Failed to submit review.' });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      res.status(500).json({ message: 'Server error while submitting review.' });
+    }
+  });
+  
 
 // Start the server with Socket.IO
 server.listen(port, () => {

@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const ReviewNgo = () => {
@@ -8,7 +7,7 @@ const ReviewNgo = () => {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const navigate = useNavigate();
-  const [ngos, setNgos] = useState([]); // To store fetched NGOs
+  const [ngos, setNgos] = useState([]);
 
   const handleStarHover = (star) => {
     setRating(star);
@@ -18,13 +17,31 @@ const ReviewNgo = () => {
     setRating(star);
   };
 
-  const handleReviewSubmit = () => {
-    // Handle review submit logic here
+  const handleReviewSubmit = async () => {
+    if (!selectedNgo || rating === 0 || !review) {
+      alert('Please select an NGO, provide a rating, and write a review.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:4000/api/review', {
+        ngoId: selectedNgo,
+        rating,
+        review,
+      });
+      if (response.status === 200) {
+        alert('Review submitted successfully!');
+        navigate('/dashboard/contributor');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review.');
+    }
   };
 
   useEffect(() => {
     let isMounted = true;
-  
+
     const fetchNgos = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/ngosforreview');
@@ -41,18 +58,17 @@ const ReviewNgo = () => {
         alert('Failed to load NGOs.');
       }
     };
-  
+
     fetchNgos();
-  
+
     return () => {
-      isMounted = false; // Cleanup function to prevent state updates after unmount
+      isMounted = false;
     };
   }, []);
-  
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        {/* Heading */}
         <div className="border-b-2 pb-4 mb-6">
           <h1 className="text-2xl font-bold text-center text-blue-600">
             Review an NGO
@@ -72,7 +88,7 @@ const ReviewNgo = () => {
           >
             <option value="">-- Select an NGO --</option>
             {ngos.map((ngo) => (
-              <option key={ngo.id} value={ngo.id}>
+              <option key={ngo.ngo_id} value={ngo.ngo_id}>
                 {ngo.name}
               </option>
             ))}
@@ -122,7 +138,6 @@ const ReviewNgo = () => {
             Submit Review
           </button>
 
-          {/* Back to Dashboard */}
           <button
             onClick={() => navigate('/dashboard/contributor')}
             className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition duration-300"
