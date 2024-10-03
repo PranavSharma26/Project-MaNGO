@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const FoodResources = () => {
+const ClothResources = () => {
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -8,7 +8,7 @@ const FoodResources = () => {
     useEffect(() => {
         const fetchResources = async () => {
             try {
-                const response = await fetch('http://localhost:4000/api/resources/food');
+                const response = await fetch('http://localhost:4000/api/resources/clothes');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -54,9 +54,9 @@ const FoodResources = () => {
 
     return (
         <div className="p-8">
-            <h2 className="text-2xl font-semibold mb-6">Food Resources</h2>
+            <h2 className="text-2xl font-semibold mb-6">Cloth Resources</h2>
             {resources.length === 0 ? (
-                <p className="text-center">No food resources available.</p>
+                <p className="text-center">No clothing resources available.</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {resources.map(resource => (
@@ -75,4 +75,5 @@ const FoodResources = () => {
     );
 };
 
-export default FoodResources;
+// Ensure to export the component as default
+export default ClothResources;

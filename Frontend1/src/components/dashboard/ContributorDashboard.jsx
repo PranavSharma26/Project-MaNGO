@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import { FaDonate, FaHandHoldingHeart, FaDollarSign } from "react-icons/fa";
 import Slider from "react-slick";
@@ -5,9 +7,7 @@ import { useNavigate } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from "axios";
-
 import io from "socket.io-client";
-
 const socket = io("http://localhost:4000");
 
 function ContributorDashboard() {
@@ -21,8 +21,13 @@ function ContributorDashboard() {
   const [amount, setAmount] = useState(0);
   const [filteredNgos, setFilteredNgos] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [selectedNgoId, setSelectedNgoId] = useState(null);
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // const [ngos, setNgos] = useState([]);
+
+  const [donationAmount, setDonationAmount] = useState(0); 
   const [resourceData, setResourceData] = useState({
     resource_name: "",
     resource_type: "",
@@ -76,6 +81,65 @@ function ContributorDashboard() {
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
+
+  const handleNgoChange = (ngoId) => {  
+    setSelectedNgoId(ngoId);  
+   };  
+   
+   const handleAmountChange = (e) => {  
+    setDonationAmount(e.target.value);  
+   };  
+   
+   const handleSubmit = async (e) => {  
+    e.preventDefault();  
+   
+    const token = localStorage.getItem("access_token");  
+    const parsedToken = JSON.parse(atob(token.split(".")[1]));  
+    const donorId = parsedToken.user_id; // Assuming this maps to your contributor ID  
+   
+    const donationData = {  
+     donor_id: donorId,  
+     ngo_id: selectedNgoId,  
+     amount: donationAmount,  
+    };
+
+    try {  
+      await axios.post("http://localhost:4000/api/donations", donationData);  
+      // Handle successful donation  
+     } catch (err) {  
+      console.error("Error submitting donation:", err);  
+      // Handle error  
+     }  
+    };  
+    
+    useEffect(() => {  
+     const token = localStorage.getItem("access_token");  
+     if (token) {  
+      const parsedToken = JSON.parse(atob(token.split(".")[1]));  
+      setResourceData((prevData) => ({  
+        ...prevData,  
+        user_id: parsedToken.user_id,  
+      }));  
+     }  
+    
+    const fetchNgos = async () => {  
+    if (!selectedCity) return; // Exit if no city is selected  
+    try {  
+      const response = await axios.get(  
+        `http://localhost:4000/api/ngos?city=${selectedCity}`
+      );  
+      const ngosData = Array.isArray(response.data.ngos)  
+        ? response.data.ngos  
+        : [];  
+      setNgos(ngosData);  
+      setFilteredNgos(ngosData);  
+      console.log("Filtered NGOs:", ngosData);  
+    } catch (err) {  
+      console.error("Error fetching NGOs:", err);  
+    }  
+    };  
+    fetchNgos(); // Fetch NGOs when component mounts or selectedCity changes  
+  }, [selectedCity]); // Dependency array to run effect when selectedCity changes  
 
   const sliderSettings = {
     dots: true,
@@ -177,16 +241,17 @@ const handleAmountSubmit = async (e) => {
   e.preventDefault();
   
   const ngo_id = selectedNgo;
+  const donor_id = resourceData.user_id;
   const donation_amount = parseFloat(amount); 
 
   if (isNaN(donation_amount)) {
       console.error("Donation not found");
       return;
   }
-  if (!ngo_id) {
-      console.error("NGO Id not found");
-      return;
-  }
+  if (!donor_id || !ngo_id || !donation_amount) {  
+    console.error('All fields are required');  
+    return;  
+  }  
 
   try {
       // Fetch donor_id using the NGO ID

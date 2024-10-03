@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const ReviewNgo = () => {
   const [selectedNgo, setSelectedNgo] = useState('');
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const navigate = useNavigate();
+  const [ngos, setNgos] = useState([]);
 
   const handleStarHover = (star) => {
     setRating(star);
@@ -15,14 +17,58 @@ const ReviewNgo = () => {
     setRating(star);
   };
 
-  const handleReviewSubmit = () => {
-    // Handle review submit logic here
+  const handleReviewSubmit = async () => {
+    if (!selectedNgo || rating === 0 || !review) {
+      alert('Please select an NGO, provide a rating, and write a review.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:4000/api/review', {
+        ngoId: selectedNgo,
+        rating,
+        review,
+      });
+      if (response.status === 200) {
+        alert('Review submitted successfully!');
+        navigate('/dashboard/contributor');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Failed to submit review.');
+    }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchNgos = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/ngosforreview');
+        if (isMounted) {
+          console.log('NGO Data:', response.data);
+          if (Array.isArray(response.data)) {
+            setNgos(response.data);
+          } else {
+            alert('Unexpected data format received from the server.');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching NGOs:', error);
+        alert('Failed to load NGOs.');
+      }
+    };
+
+    fetchNgos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        {/* Heading */}
         <div className="border-b-2 pb-4 mb-6">
           <h1 className="text-2xl font-bold text-center text-blue-600">
             Review an NGO
@@ -41,9 +87,11 @@ const ReviewNgo = () => {
             className="block w-full p-2 border border-gray-300 rounded-md"
           >
             <option value="">-- Select an NGO --</option>
-            <option value="ngo1">NGO 1</option>
-            <option value="ngo2">NGO 2</option>
-            <option value="ngo3">NGO 3</option>
+            {ngos.map((ngo) => (
+              <option key={ngo.ngo_id} value={ngo.ngo_id}>
+                {ngo.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -90,7 +138,6 @@ const ReviewNgo = () => {
             Submit Review
           </button>
 
-          {/* Back to Dashboard */}
           <button
             onClick={() => navigate('/dashboard/contributor')}
             className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600 transition duration-300"

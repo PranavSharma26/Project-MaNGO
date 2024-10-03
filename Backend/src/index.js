@@ -59,6 +59,7 @@ io.on("connection", (socket) => {
             // Log the notification ID returned from the server
             const { notification_id } = response.data;
             console.log('Notification ID:', notification_id);
+            // console.log('Notification ID:', notification_id);
         } catch (err) {
             console.error('Error inserting notification:', err.response ? err.response.data : err.message);
         }
@@ -68,9 +69,6 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
-
-
-
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -143,7 +141,21 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Login for Contributors
+// Fetch food resources
+app.get('/api/resources/food', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+
+
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -434,8 +446,144 @@ app.get('/api/donor/:ngo_id', async (req, res) => {
     }
 });
 
+app.get('/api/resources/other', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Other' OR resource_type = 'Toys' AND status = 'available';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
 
+// Booking resource route
+app.patch('/api/resources/book/:id', async (req, res) => {
+    const resourceId = req.params.id;
 
+    try {
+        const updateQuery = 'UPDATE resource SET status = ? WHERE resource_id = ? AND status = ?';
+        const values = ['booked', resourceId, 'available'];
+
+        const [result] = await connection.promise().query(updateQuery, values);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Resource not found or already booked' });
+        }
+        
+        res.status(200).json({ message: 'Resource booked successfully' });
+    } catch (error) {
+        console.error('Error booking resource:', error);
+        res.status(500).json({ message: 'Failed to book the resource' });
+    }
+});
+
+app.post('/api/donate', async (req, res) => {
+    const { donor_id, ngo_id, donation_amount } = req.body;
+
+    // Input validation
+    if (!donor_id) {
+        return res.status(400).json({ message: 'Donor_id not found' });
+    }
+    if (!ngo_id) {
+        return res.status(400).json({ message: 'NGO not found' });
+    }
+    if (!donation_amount) {
+        return res.status(400).json({ message: 'Donation Amount not found' });
+    }
+    try {
+        const query = `
+            INSERT INTO Donations (donor_id, ngo_id, donation_amount)
+            VALUES (?, ?, ?)
+        `;
+        
+        await connection.promise().query(query, [donor_id, ngo_id, donation_amount]);
+        
+        res.status(201).json({ message: 'Donation successfully recorded' });
+    } catch (err) {
+        console.error('Error inserting donation:', err); // Log the error
+        res.status(500).json({ message: 'Server error', error: err.message }); // Include error message in response
+    }
+});
+
+app.get('/api/donor/:ngo_id', async (req, res) => {
+    const { ngo_id } = req.params;
+    
+    try {
+        // Check if the NGO exists
+        const ngoQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_id = ? AND user_type = 'N'
+        `;
+        const [ngoResults] = await connection.promise().query(ngoQuery, [ngo_id]);
+        
+        if (ngoResults.length === 0) {
+            return res.status(404).json({ message: 'NGO not found' });
+        }
+        
+        // Fetch the donor ID (which is a contributor)
+        const donorQuery = `
+            SELECT user_id 
+            FROM Users 
+            WHERE user_type = 'C' -- Assuming you want to find contributors/donors
+        `;
+        const [donorResults] = await connection.promise().query(donorQuery);
+        
+        if (donorResults.length === 0) {
+            return res.status(404).json({ message: 'Donor not found for this NGO' });
+        }
+        
+        res.json(donorResults); // Return the donor information
+    } catch (err) {
+        console.error('Error fetching donor:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// API route to get all NGOs from the database for review
+router.get('/api/ngosforreview', (req, res) => {
+    const sqlQuery = `
+      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
+      FROM NGO n
+      JOIN Users u ON n.ngo_id = u.user_id
+      WHERE u.user_type = 'N'
+    `;
+  
+    connection.query(sqlQuery, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json(result);
+    });
+  });
+  
+router.post('/api/review', async (req, res) => {
+    const { ngoId, rating, review } = req.body;
+    const userId = req.userId; // Get userId from JWT token
+    
+    try {
+      // Generate a unique review_id (you can use a library like uuid for this)
+      const reviewId = generateUniqueId(); // Implement this function as needed
+  
+      // Insert review into the database
+      const result = await db.query(
+        'INSERT INTO Review (review_id, contributor_id, ngo_id, description) VALUES (?, ?, ?, ?)',
+        [reviewId, userId, ngoId, review] // Update to match your table structure
+      );
+  
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'Review submitted successfully!' });
+      } else {
+        res.status(500).json({ message: 'Failed to submit review.' });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      res.status(500).json({ message: 'Server error while submitting review.' });
+    }
+  });
+  
 // Start the server with Socket.IO
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

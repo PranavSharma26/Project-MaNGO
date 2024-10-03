@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const FoodResources = () => {
+const OtherResources = () => {
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -8,7 +8,7 @@ const FoodResources = () => {
     useEffect(() => {
         const fetchResources = async () => {
             try {
-                const response = await fetch('http://localhost:4000/api/resources/food');
+                const response = await fetch('http://localhost:4000/api/resources/other');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -54,9 +54,9 @@ const FoodResources = () => {
 
     return (
         <div className="p-8">
-            <h2 className="text-2xl font-semibold mb-6">Food Resources</h2>
+            <h2 className="text-2xl font-semibold mb-6">Other Resources</h2>
             {resources.length === 0 ? (
-                <p className="text-center">No food resources available.</p>
+                <p className="text-center">No other resources available.</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {resources.map(resource => (
@@ -64,7 +64,10 @@ const FoodResources = () => {
                             <h3 className="text-lg font-semibold">{resource.resource_name}</h3>
                             <p className="text-gray-700">Quantity: {resource.quantity} {resource.unit}</p>
                             <p className="text-gray-600">{resource.description}</p>
-                            <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200" onClick={() => handleBook(resource.resource_id)}>
+                            <button 
+                                className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200" 
+                                onClick={() => handleBook(resource.resource_id)}
+                            >
                                 Book
                             </button>
                         </div>
@@ -75,4 +78,4 @@ const FoodResources = () => {
     );
 };
 
-export default FoodResources;
+export default OtherResources;
