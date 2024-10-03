@@ -38,7 +38,6 @@ const ReviewNgo = () => {
       alert('Failed to submit review.');
     }
   };
-
   useEffect(() => {
     let isMounted = true;
 
@@ -48,7 +47,7 @@ const ReviewNgo = () => {
         if (isMounted) {
           console.log('NGO Data:', response.data);
           if (Array.isArray(response.data)) {
-            setNgos(response.data);
+            setNgos(response.data);  // Set the fetched NGOs in state
           } else {
             alert('Unexpected data format received from the server.');
           }
@@ -62,9 +61,10 @@ const ReviewNgo = () => {
     fetchNgos();
 
     return () => {
-      isMounted = false;
+      isMounted = false; // Cleanup function to prevent state updates after unmount
     };
-  }, []);
+}, []);
+
 
   return (
     <div className="flex justify-center items-center h-screen">
