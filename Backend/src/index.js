@@ -24,8 +24,6 @@ const io = new Server(server, {
         origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
     }
 });
-
-
 // const axios = require('axios'); // Import axios
 
 io.on("connection", (socket) => {
@@ -89,8 +87,12 @@ connection.connect((err) => {
 });
 
 const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).json({ error: 'No token provided' });
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(403).json({ error: 'No token provided' });
+
+    // Ensure the token is in the format 'Bearer <token>'
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(403).json({ error: 'Malformed token' });
 
     jwt.verify(token, process.env.JWT_SECRET || '1234', (err, decoded) => {
         if (err) return res.status(401).json({ error: 'Failed to authenticate token' });
@@ -98,8 +100,6 @@ const verifyToken = (req, res, next) => {
         next();
     });
 };
-
-
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
     const userId = req.params.user_id;
@@ -434,21 +434,22 @@ app.get('/api/ngosforreview', (req, res) => {
       res.json(result); // Sends the list of NGOs in the expected format
     });
 });
-// module.exports = router;
-app.post('/api/review', async (req, res) => {
+
+app.post('/api/review', verifyToken, async (req, res) => {
     const { ngoId, rating, review } = req.body;
     const userId = req.userId; // Get contributor's userId from JWT token
-    
+
+    console.log("Received review data:", { ngoId, rating, review });
+    console.log("Contributor userId from JWT:", userId);
+
     try {
-      // Generate a unique review_id (you can use a library like uuid for this)
-      const reviewId = generateUniqueId(); // Implement this function or use UUID
-  
-      // Insert the review into the Review table
+      const reviewId = generateUniqueId(); // Assuming you have a method to generate unique IDs
+
       const result = await db.query(
-        'INSERT INTO Review (review_id, contributor_id, ngo_id, description) VALUES (?, ?, ?, ?)',
-        [reviewId, userId, ngoId, review] // Use userId for contributor_id
+        'INSERT INTO Review (review_id, contributor_id, ngo_id, description, rating) VALUES (?, ?, ?, ?, ?)',
+        [reviewId, userId, ngoId, review, rating]
       );
-  
+
       if (result.affectedRows > 0) {
         res.status(200).json({ message: 'Review submitted successfully!' });
       } else {
@@ -456,11 +457,10 @@ app.post('/api/review', async (req, res) => {
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      res.status(500).json({ message: 'Server error while submitting review.' });
+      res.status(500).json({ message: 'Server error while submitting review.', error: error.message });
     }
 });
 
-  
 
 // Start the server with Socket.IO
 server.listen(port, () => {
