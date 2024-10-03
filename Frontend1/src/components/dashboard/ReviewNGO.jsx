@@ -24,11 +24,21 @@ const ReviewNgo = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:4000/api/review', {
-        ngoId: selectedNgo,
-        rating,
-        review,
-      });
+      const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+      const response = await axios.post(
+        'http://localhost:4000/api/review',
+        {
+          ngoId: selectedNgo,
+          rating,
+          review,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach token in headers
+          },
+        }
+      );
+
       if (response.status === 200) {
         alert('Review submitted successfully!');
         navigate('/dashboard/contributor');
@@ -37,7 +47,8 @@ const ReviewNgo = () => {
       console.error('Error submitting review:', error);
       alert('Failed to submit review.');
     }
-  };
+};
+
   useEffect(() => {
     let isMounted = true;
 
