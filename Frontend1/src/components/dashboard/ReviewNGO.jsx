@@ -6,8 +6,8 @@ const ReviewNgo = () => {
   const [selectedNgo, setSelectedNgo] = useState('');
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
-  const navigate = useNavigate();
   const [ngos, setNgos] = useState([]);
+  const navigate = useNavigate();
 
   const handleStarHover = (star) => {
     setRating(star);
@@ -24,20 +24,42 @@ const ReviewNgo = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:4000/api/review', {
-        ngoId: selectedNgo,
-        rating,
-        review,
-      });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('User not authenticated.');
+        return;
+      }
+
+      const response = await axios.post(
+        'http://localhost:4000/api/review',
+        {
+          ngoId: selectedNgo,
+          rating,
+          review,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
+      );
+
       if (response.status === 200) {
         alert('Review submitted successfully!');
         navigate('/dashboard/contributor');
+      } else {
+        alert('Failed to submit review.');
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Failed to submit review.');
+      if (error.response && error.response.status === 401) {
+        alert('Unauthorized: Please log in again.');
+      } else {
+        alert('Failed to submit review.');
+      }
     }
   };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -47,7 +69,7 @@ const ReviewNgo = () => {
         if (isMounted) {
           console.log('NGO Data:', response.data);
           if (Array.isArray(response.data)) {
-            setNgos(response.data);  // Set the fetched NGOs in state
+            setNgos(response.data); 
           } else {
             alert('Unexpected data format received from the server.');
           }
@@ -61,10 +83,9 @@ const ReviewNgo = () => {
     fetchNgos();
 
     return () => {
-      isMounted = false; // Cleanup function to prevent state updates after unmount
+      isMounted = false; 
     };
-}, []);
-
+  }, []);
 
   return (
     <div className="flex justify-center items-center h-screen">
