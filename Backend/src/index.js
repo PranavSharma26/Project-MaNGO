@@ -9,14 +9,9 @@ const router = express.Router();
 import http from 'http';
 import { Server } from 'socket.io';  // For ES Modules
 import axios from 'axios'; // Import axios
-
-
-
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
-
-
 // for notification server
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -24,10 +19,6 @@ const io = new Server(server, {
         origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
     }
 });
-
-
-// const axios = require('axios'); // Import axios
-
 io.on("connection", (socket) => {
     // console.log("A user connected");
 
@@ -41,14 +32,12 @@ io.on("connection", (socket) => {
      // Create the notification message
     let notificationMessage = "";  // Use 'let' instead of 'const'
     if (type === 1) {
-        notificationMessage = `${senderName} posted a Resource`;
+        notificationMessage =` ${senderName} posted a Resource`;
     } else if (type === 2) {
         notificationMessage = `${senderName} posted a Service`;
     } else {
         notificationMessage = `${senderName} donated money`;
     }
-
-
         // Insert the notification into the database
         try {
             const response = await axios.post('http://localhost:4000/api/notification', {
@@ -68,9 +57,6 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
-
-
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -82,7 +68,6 @@ const connection = mysql.createConnection({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'REGISTER'
 });
-
 connection.connect((err) => {
     if (err) {
         console.error('Error connecting to the database:', err);
@@ -95,19 +80,24 @@ const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
     if (!token) return res.status(403).json({ error: 'No token provided' });
 
-    jwt.verify(token, process.env.JWT_SECRET || '1234', (err, decoded) => {
+    const tokenParts = token.split(' ');
+    if (tokenParts[0] !== 'Bearer' || !tokenParts[1]) {
+        return res.status(401).json({ error: 'Invalid token format' });
+    }
+
+    const authToken = tokenParts[1];
+    jwt.verify(authToken, process.env.JWT_SECRET || '1234', (err, decoded) => {
         if (err) return res.status(401).json({ error: 'Failed to authenticate token' });
         req.userId = decoded.id;
         next();
     });
 };
 
-
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
     const userId = req.params.user_id;
   
-    const sql = `SELECT first_name, last_name FROM users WHERE user_id = ?`;
+    const sql =` SELECT first_name, last_name FROM users WHERE user_id = ?`;
     connection.query(sql, [userId], (err, result) => {
       if (err) {
         console.error('Error fetching user details:', err);
@@ -120,9 +110,6 @@ app.get('/api/users/:user_id', (req, res) => {
       res.status(200).send(result[0]); // Send back first_name and last_name
     });
   });   
-  
-
-
 // Registration Route
 app.post('/api/register', async (req, res) => {
     const { user_id, user_type, first_name, middle_name, last_name, contact, email, password, address, city } = req.body;
@@ -142,21 +129,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Fetch food resources
-app.get('/api/resources/food', (req, res) => {
-    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
-    connection.query(sql, (err, result) => {
-        if (err) {
-            console.error("Error fetching resources:", err);
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(result);
-        }
-    });
-});
-
-
-
+// Login for Contributors
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -211,9 +184,6 @@ app.post('/api/login/ngo', async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 });
-
-
-
 // API route to handle notification into table
 app.post('/api/notification', (req, res) => {
     const { user_id, notification_message } = req.body;
@@ -234,10 +204,6 @@ app.post('/api/notification', (req, res) => {
         res.status(201).send({ message: 'Notification added successfully', notification_id: result.insertId });
     });
 });
-
-
-
-
 // API route to handle resource form submissions
 app.post('/api/resource', (req, res) => {
     const { user_id, resource_name, resource_type, quantity, unit, duration, time_unit, description } = req.body;
@@ -303,24 +269,6 @@ app.put('/api/profile', verifyToken, (req, res) => {
         else res.status(404).json({ error: 'User not found' });
     });
 });
-
-// API route to get all NGOs from the database for review
-router.get('/api/ngosforreview', (req, res) => {
-    const sqlQuery = `
-      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
-      FROM NGO n
-      JOIN Users u ON n.ngo_id = u.user_id
-      WHERE u.user_type = 'N'
-    `;
-  
-    connection.query(sqlQuery, (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-      res.json(result);
-    });
-  });
-  
   app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -336,6 +284,19 @@ router.get('/api/ngosforreview', (req, res) => {
         console.error('Error fetching NGOs:', err);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+// Fetch food resources
+app.get('/api/resources/food', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching food resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
 });
 
 // Fetch clothes resources
@@ -447,6 +408,53 @@ app.get('/api/donor/:ngo_id', async (req, res) => {
     }
 });
 
+// API route to get all NGOs from the database for review
+app.get('/api/ngosforreview', (req, res) => {
+    const sqlQuery = `
+      SELECT user_id AS ngo_id, CONCAT(first_name, ' ', last_name) AS name 
+      FROM Users
+      WHERE user_type = 'N'
+    `;
+  
+    connection.query(sqlQuery, (err, result) => {
+      if (err) {
+        console.error('Database query failed:', err);
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json(result); // Sends the list of NGOs in the expected format
+    });
+});
+
+app.post('/api/review', verifyToken, async (req, res) => {
+    const { ngoId, rating, review } = req.body;
+    const userId = req.userId; // Get contributor's userId from JWT token
+    
+    try {
+        // Insert the review into the Review table, including the rating
+        const result = await new Promise((resolve, reject) => {
+            connection.query(
+                'INSERT INTO Review (contributor_id, ngo_id, description, rating) VALUES (?, ?, ?, ?)',
+                [userId, ngoId, review, rating],
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve(result);
+                }
+            );
+        });        
+
+        // Check if the insert was successful
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Review submitted successfully!' });
+        } else {
+            res.status(500).json({ message: 'Failed to submit review.' });
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error.message);
+        res.status(500).json({ message: 'Server error while submitting review.', error: error.message });
+    }
+});
 
 
 // Start the server with Socket.IO
