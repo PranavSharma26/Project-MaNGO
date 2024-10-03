@@ -24,6 +24,8 @@ const io = new Server(server, {
         origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
     }
 });
+
+
 // const axios = require('axios'); // Import axios
 
 io.on("connection", (socket) => {
@@ -66,6 +68,9 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
+
+
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -87,12 +92,8 @@ connection.connect((err) => {
 });
 
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) return res.status(403).json({ error: 'No token provided' });
-
-    // Ensure the token is in the format 'Bearer <token>'
-    const token = authHeader.split(' ')[1];
-    if (!token) return res.status(403).json({ error: 'Malformed token' });
+    const token = req.headers['authorization'];
+    if (!token) return res.status(403).json({ error: 'No token provided' });
 
     jwt.verify(token, process.env.JWT_SECRET || '1234', (err, decoded) => {
         if (err) return res.status(401).json({ error: 'Failed to authenticate token' });
@@ -100,6 +101,8 @@ const verifyToken = (req, res, next) => {
         next();
     });
 };
+
+
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
     const userId = req.params.user_id;
@@ -139,19 +142,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Fetch food resources
-app.get('/api/resources/food', (req, res) => {
-    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
-    connection.query(sql, (err, result) => {
-        if (err) {
-            console.error("Error fetching resources:", err);
-            res.status(500).json({ error: err.message });
-        } else {
-            res.json(result);
-        }
-    });
-});
-// login as a contributor
+// Login for Contributors
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -207,6 +198,8 @@ app.post('/api/login/ngo', async (req, res) => {
     }
 });
 
+
+
 // API route to handle notification into table
 app.post('/api/notification', (req, res) => {
     const { user_id, notification_message } = req.body;
@@ -227,6 +220,9 @@ app.post('/api/notification', (req, res) => {
         res.status(201).send({ message: 'Notification added successfully', notification_id: result.insertId });
     });
 });
+
+
+
 
 // API route to handle resource form submissions
 app.post('/api/resource', (req, res) => {
@@ -293,6 +289,49 @@ app.put('/api/profile', verifyToken, (req, res) => {
         else res.status(404).json({ error: 'User not found' });
     });
 });
+
+// API route to get all NGOs from the database for review
+app.get('/api/ngosforreview', (req, res) => {
+    const sqlQuery = `
+      SELECT user_id AS ngo_id, CONCAT(first_name, ' ', last_name) AS name 
+      FROM Users
+      WHERE user_type = 'N'
+    `;
+  
+    connection.query(sqlQuery, (err, result) => {
+      if (err) {
+        console.error('Database query failed:', err);
+        return res.status(500).json({ error: 'Database query failed' });
+      }
+      res.json(result); // Sends the list of NGOs in the expected format
+    });
+});
+  
+app.post('/api/review', async (req, res) => {
+    const { ngoId, rating, review } = req.body;
+    const userId = req.userId; // Get contributor's userId from JWT token
+    
+    try {
+      // Generate a unique review_id (you can use a library like uuid for this)
+      const reviewId = generateUniqueId(); // Implement this function or use UUID
+  
+      // Insert the review into the Review table
+      const result = await db.query(
+        'INSERT INTO Review (review_id, contributor_id, ngo_id, description) VALUES (?, ?, ?, ?)',
+        [reviewId, userId, ngoId, review] // Use userId for contributor_id
+      );
+  
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'Review submitted successfully!' });
+      } else {
+        res.status(500).json({ message: 'Failed to submit review.' });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      res.status(500).json({ message: 'Server error while submitting review.' });
+    }
+});
+
   app.get('/api/ngos', async (req, res) => {
     const { city } = req.query;
     try {
@@ -309,6 +348,20 @@ app.put('/api/profile', verifyToken, (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+// Fetch food resources
+app.get('/api/resources/food', (req, res) => {
+    const sql = "SELECT * FROM resource WHERE resource_type = 'Food' AND status = 'available';";
+    connection.query(sql, (err, result) => {
+        if (err) {
+            console.error("Error fetching food resources:", err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(result);
+        }
+    });
+});
+
 
 // Fetch clothes resources
 app.get('/api/resources/clothes', (req, res) => {
@@ -419,47 +472,6 @@ app.get('/api/donor/:ngo_id', async (req, res) => {
     }
 });
 
-app.get('/api/ngosforreview', (req, res) => {
-    const sqlQuery = `
-      SELECT user_id AS ngo_id, CONCAT(first_name, ' ', last_name) AS name 
-      FROM Users
-      WHERE user_type = 'N'
-    `;
-  
-    connection.query(sqlQuery, (err, result) => {
-      if (err) {
-        console.error('Database query failed:', err);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-      res.json(result); // Sends the list of NGOs in the expected format
-    });
-});
-
-app.post('/api/review', verifyToken, async (req, res) => {
-    const { ngoId, rating, review } = req.body;
-    const userId = req.userId; // Get contributor's userId from JWT token
-
-    console.log("Received review data:", { ngoId, rating, review });
-    console.log("Contributor userId from JWT:", userId);
-
-    try {
-      const reviewId = generateUniqueId(); // Assuming you have a method to generate unique IDs
-
-      const result = await db.query(
-        'INSERT INTO Review (review_id, contributor_id, ngo_id, description, rating) VALUES (?, ?, ?, ?, ?)',
-        [reviewId, userId, ngoId, review, rating]
-      );
-
-      if (result.affectedRows > 0) {
-        res.status(200).json({ message: 'Review submitted successfully!' });
-      } else {
-        res.status(500).json({ message: 'Failed to submit review.' });
-      }
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      res.status(500).json({ message: 'Server error while submitting review.', error: error.message });
-    }
-});
 
 
 // Start the server with Socket.IO
