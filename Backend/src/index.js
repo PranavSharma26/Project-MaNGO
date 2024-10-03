@@ -68,9 +68,6 @@ io.on("connection", (socket) => {
         console.log("Someone has left");
     });
 });
-
-
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -154,9 +151,7 @@ app.get('/api/resources/food', (req, res) => {
         }
     });
 });
-
-
-
+// login as a contributor
 app.post('/api/login/contributor', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -212,8 +207,6 @@ app.post('/api/login/ngo', async (req, res) => {
     }
 });
 
-
-
 // API route to handle notification into table
 app.post('/api/notification', (req, res) => {
     const { user_id, notification_message } = req.body;
@@ -234,9 +227,6 @@ app.post('/api/notification', (req, res) => {
         res.status(201).send({ message: 'Notification added successfully', notification_id: result.insertId });
     });
 });
-
-
-
 
 // API route to handle resource form submissions
 app.post('/api/resource', (req, res) => {
@@ -429,35 +419,34 @@ app.get('/api/donor/:ngo_id', async (req, res) => {
     }
 });
 
-// API route to get all NGOs from the database for review
-router.get('/api/ngosforreview', (req, res) => {
+app.get('/api/ngosforreview', (req, res) => {
     const sqlQuery = `
-      SELECT u.user_id AS id, CONCAT(u.first_name, ' ', u.last_name) AS name 
-      FROM NGO n
-      JOIN Users u ON n.ngo_id = u.user_id
-      WHERE u.user_type = 'N'
+      SELECT user_id AS ngo_id, CONCAT(first_name, ' ', last_name) AS name 
+      FROM Users
+      WHERE user_type = 'N'
     `;
   
     connection.query(sqlQuery, (err, result) => {
       if (err) {
+        console.error('Database query failed:', err);
         return res.status(500).json({ error: 'Database query failed' });
       }
-      res.json(result);
+      res.json(result); // Sends the list of NGOs in the expected format
     });
-  });
-  
-router.post('/api/review', async (req, res) => {
+});
+// module.exports = router;
+app.post('/api/review', async (req, res) => {
     const { ngoId, rating, review } = req.body;
-    const userId = req.userId; // Get userId from JWT token
+    const userId = req.userId; // Get contributor's userId from JWT token
     
     try {
       // Generate a unique review_id (you can use a library like uuid for this)
-      const reviewId = generateUniqueId(); // Implement this function as needed
+      const reviewId = generateUniqueId(); // Implement this function or use UUID
   
-      // Insert review into the database
+      // Insert the review into the Review table
       const result = await db.query(
         'INSERT INTO Review (review_id, contributor_id, ngo_id, description) VALUES (?, ?, ?, ?)',
-        [reviewId, userId, ngoId, review] // Update to match your table structure
+        [reviewId, userId, ngoId, review] // Use userId for contributor_id
       );
   
       if (result.affectedRows > 0) {
@@ -469,7 +458,8 @@ router.post('/api/review', async (req, res) => {
       console.error('Error submitting review:', error);
       res.status(500).json({ message: 'Server error while submitting review.' });
     }
-  });
+});
+
   
 
 // Start the server with Socket.IO
