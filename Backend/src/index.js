@@ -111,14 +111,6 @@ app.get('/api/service', (req, res) => {
     });
   });
 
-
-
-
-
-
-
-
-
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
     const userId = req.params.user_id;
@@ -481,57 +473,8 @@ app.post('/api/review', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Server error while submitting review.', error: error.message });
     }
 });
-
-
 // Start the server with Socket.IO
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
