@@ -12,6 +12,7 @@ import axios from 'axios'; // Import axios
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
+// import phonepeRoute from './phonepeRoute'
 // for notification server
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -456,6 +457,8 @@ app.post('/api/review', verifyToken, async (req, res) => {
     }
 });
 
+// Payment Gateway (PhonePe) API route
+// app.use("/api", phonepeRoute)
 
 // Start the server with Socket.IO
 server.listen(port, () => {

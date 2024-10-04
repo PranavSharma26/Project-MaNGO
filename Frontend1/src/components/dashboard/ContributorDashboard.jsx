@@ -622,24 +622,7 @@ const handleAmountSubmit = async (e) => {
                 {/* Add more cities as needed */}
               </select>
             </div>
-
-            <div className="mb-4">
-              <label
-                className="block text-sm font-medium mb-2"
-                htmlFor="amount"
-              >
-                Donation Amount
-              </label>
-              <input
-                type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-
+            
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">
                 Select NGO
@@ -663,6 +646,25 @@ const handleAmountSubmit = async (e) => {
                 </select>
               )}
             </div>
+            
+            <div className="mb-4">
+              <label
+                className="block text-sm font-medium mb-2"
+                htmlFor="amount"
+              >
+                Donation Amount
+              </label>
+              <input
+                type="number"
+                id="amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+
+            
 
             <button
               type="submit"
