@@ -52,11 +52,6 @@ function NGODashboard() {
 
   return (
         <div className="p-4 sm:p-8 bg-gray-100 min-h-screen">
-          {/* Navbar */}
-          <nav className="bg-blue-500 p-4 text-white mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold">NGO Dashboard</h1>
-          </nav>
-    
           <div className="flex flex-col lg:flex-row">
             {/* Left Section: Search Bar */}
             <div className="w-full lg:w-1/4 p-4 bg-white rounded-lg shadow-lg mb-6 lg:mb-0 lg:mr-6">
