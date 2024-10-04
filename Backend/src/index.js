@@ -96,7 +96,19 @@ const verifyToken = (req, res, next) => {
 
 // Endpoint to fetch all posted services
 app.get('/api/service', (req, res) => {
-    const sql = `SELECT * FROM service`;
+    const sql = `SELECT 
+    s.service_id, 
+    s.user_id, 
+    CONCAT(u.first_name, ' ', IFNULL(u.middle_name, ''), ' ', u.last_name) AS user_name, -- Concatenate names
+    s.timestamp, 
+    s.service_type, 
+    s.description, 
+    s.status
+FROM 
+    Service s
+JOIN 
+    users u ON s.user_id = u.user_id;
+`;
   
     connection.query(sql, (err, result) => {
       if (err) {
@@ -111,13 +123,44 @@ app.get('/api/service', (req, res) => {
     });
   });
 
+// Book a Service
+app.post('/api/book-service/:service_id', verifyToken, (req, res) => {
+    const serviceId = req.params.service_id;
+    const userId = req.userId;
 
+    // Query to check if the service is available
+    const checkServiceQuery = `SELECT * FROM service WHERE service_id = ? AND status = 'available'`;
 
+    connection.query(checkServiceQuery, [serviceId], (err, result) => {
+        if (err) {
+            console.error('Error checking service availability:', err);
+            return res.status(500).json({ message: 'Error checking service availability', error: err });
+        }
 
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'Service not available or already booked' });
+        }
 
+        // Update the status of the service to 'unavailable'
+        const updateQuery = `UPDATE service SET status = 'unavailable' WHERE service_id = ?`;
 
+        connection.query(updateQuery, [serviceId], (err, result) => {
+            if (err) {
+                console.error('Error updating service status:', err);
+                return res.status(500).json({ message: 'Error booking service', error: err });
+            }
 
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Service not found' });
+            }
 
+            // Emit notification that the service was booked
+            io.emit("service_booked", { serviceId, userId });
+
+            res.status(200).json({ message: 'Service booked successfully' });
+        });
+    });
+});
 
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
@@ -262,7 +305,7 @@ app.post('/api/service', (req, res) => {
       VALUES (?, ?, ?, ?)
     `;
 
-    const values = [user_id, timestamp, service_type, description];
+    const values = [user_id,  timestamp, service_type, description];
 
     connection.query(sql, values, (err, result) => {
         if (err) {
