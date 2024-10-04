@@ -1,0 +1,159 @@
+use register;
+
+CREATE TABLE Users (
+   user_id VARCHAR(20) PRIMARY KEY,  -- Use VARCHAR to store IDs with prefixes
+   user_type VARCHAR(1),
+   first_name VARCHAR(50) NOT NULL,
+   middle_name VARCHAR(50),
+   last_name VARCHAR(50) NOT NULL,
+   contact VARCHAR(15) NOT NULL UNIQUE,
+   email VARCHAR(100) NOT NULL UNIQUE,
+   password VARCHAR(255) NOT NULL,
+   address VARCHAR(255),
+   city VARCHAR(100) NOT NULL,
+   CONSTRAINT chk_contact CHECK (LENGTH(contact) BETWEEN 10 AND 15),
+   CONSTRAINT chk_email CHECK (email LIKE '%@%._%')
+);
+
+CREATE TABLE ServiceProvider (
+    user_id VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Donor (
+    user_id VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE ResourceProvider (
+    user_id VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Contributor (
+    contributor_id VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (contributor_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE resource (
+  resource_id INT PRIMARY KEY AUTO_INCREMENT,  -- Auto-incremented resource ID
+  user_id VARCHAR(50) NOT NULL,
+  resource_name VARCHAR(255) NOT NULL,         -- Resource name field
+  resource_type VARCHAR(50) NOT NULL,
+  quantity INT NOT NULL,
+  unit VARCHAR(50) NOT NULL,
+  duration DATE NULL, 
+  time_unit VARCHAR(50),
+  description TEXT,                            -- Optional description for 'Others' type
+  status ENUM('available', 'booked') DEFAULT 'available', -- Status of the resource
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Service (
+       service_id INT AUTO_INCREMENT PRIMARY KEY,
+       user_id VARCHAR(50) NOT NULL,
+       timestamp VARCHAR(50), 
+       -- timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       service_type VARCHAR(255) NOT NULL,
+       description TEXT,    
+       status ENUM('available', 'unavailable') DEFAULT 'available',  -- Add status column
+       FOREIGN KEY (user_id) REFERENCES users(user_id)
+       ON DELETE CASCADE
+       ON UPDATE CASCADE
+   );
+CREATE TABLE NGO (
+    ngo_id VARCHAR(50) PRIMARY KEY,
+    FOREIGN KEY (ngo_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Notification (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    notification_message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE Review (
+    review_id VARCHAR(50) PRIMARY KEY,
+    contributor_id VARCHAR(50),
+    ngo_id VARCHAR(50),
+    description TEXT,
+    rating INT,
+    FOREIGN KEY (contributor_id) REFERENCES Users(user_id),
+    FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)
+);
+
+CREATE TABLE Receives (
+    ngo_id VARCHAR(50) PRIMARY KEY,
+    notification_id INT NOT NULL,  -- Changed to INT to match Notification table
+    FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    FOREIGN KEY (notification_id) REFERENCES Notification(notification_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+CREATE TABLE PaymentGateway (
+    gateway_id VARCHAR(50) PRIMARY KEY,
+    service_fees INT,
+    transaction_id VARCHAR(50) NOT NULL,
+    amount INT NOT NULL,
+    transaction_date VARCHAR(50) NOT NULL,
+    donor_id VARCHAR(50) NOT NULL,
+    FOREIGN KEY (donor_id) REFERENCES Donor(user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+CREATE TABLE Donations (
+    donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    donor_id VARCHAR(20),
+    ngo_id VARCHAR(20),
+    donation_amount DECIMAL(10, 2),
+    donation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (ngo_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+ALTER TABLE Review DROP PRIMARY KEY;
+ALTER TABLE Review MODIFY review_id INT AUTO_INCREMENT PRIMARY KEY;
+
+select * from users;
+select * from Donor;
+select * from PaymentGateway;
+select * from NGO;
+select * from Contributor;
+select * from resource;
+select * from Donations;
+select * from service;
+select * from notification;
+describe review;
+select * from review;
+
+-- kuch bhi dikkat ho toh bich mai chala dena isko
+SELECT user_id 
+FROM users 
+WHERE user_type = 'C' AND user_id NOT IN (SELECT contributor_id FROM Contributor);
+SELECT user_id 
+FROM users 
+WHERE user_type = 'N' AND user_id NOT IN (SELECT ngo_id FROM NGO);
+INSERT INTO Contributor (contributor_id) VALUES ('user_id_here');
+INSERT INTO NGO (ngo_id) VALUES ('user_id_here');
+
+
+
+
