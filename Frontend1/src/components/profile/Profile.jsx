@@ -21,7 +21,8 @@ const ProfileContainer = () => {
         if (viewMode === 'viewProfile') {
             axios.get('http://localhost:4000/api/profile', {
                 headers: {
-                    'Authorization': token
+                    // 'Authorization': token
+                    'Authorization': `Bearer ${token}`,  // Attach the token here
                 }
             })
             .then(response => {
@@ -56,7 +57,8 @@ const ProfileContainer = () => {
             address: profile.address
         }, {
             headers: {
-                'Authorization': token
+                // 'Authorization': token
+                'Authorization': `Bearer ${token}`,  // Attach the token here
             }
         })
         .then(response => {

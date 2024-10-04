@@ -93,6 +93,24 @@ const verifyToken = (req, res, next) => {
     });
 };
 
+
+// Endpoint to fetch all posted services
+app.get('/api/service', (req, res) => {
+    const sql = `SELECT * FROM service`;
+  
+    connection.query(sql, (err, result) => {
+      if (err) {
+        console.error('Error fetching services:', err);
+        return res.status(500).json({ message: 'Error fetching services', error: err });
+      }
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'No services found' });
+      }
+  
+      res.status(200).json(result);
+    });
+  });
+
 // Endpoint to get user details by user_id
 app.get('/api/users/:user_id', (req, res) => {
     const userId = req.params.user_id;
@@ -455,8 +473,6 @@ app.post('/api/review', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Server error while submitting review.', error: error.message });
     }
 });
-
-
 // Start the server with Socket.IO
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
