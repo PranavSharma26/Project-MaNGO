@@ -20,17 +20,14 @@ function LoginAsContributor() {
     try {
       const response = await axios.post("http://localhost:4000/api/login/contributor", userInfo);
       const { token, user_id } = response.data;
-      console.log("User ID:", user_id); // Log user_id to check its value
+      const userRole = 'contributor'; // Define the user role
 
       if (token && user_id) {
         localStorage.setItem('access_token', token);
         localStorage.setItem('user_id', user_id);
         
-        console.log("User ID stored:", user_id);
-        console.log("Token stored in localStorage:", localStorage.getItem("access_token"));
-        
-        login(token); 
-        navigate('/dashboard/contributor');
+        login(token, userRole); // Pass userRole to login function
+        navigate('/'); // Redirect to Home instead of Contributor Dashboard
       } else {
         console.error("Login failed: No token or user_id received");
       }

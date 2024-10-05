@@ -1,14 +1,33 @@
-import React, { useContext } from 'react';
+// components/Home.jsx
+import React, { useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import NGODashboard from './dashboard/NGODashboard';
+import ContributorDashboard from './dashboard/ContributorDashboard'; // Import Contributor Dashboard
 
 const Home = () => {
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, role } = useContext(AuthContext); // Get role from context
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to the appropriate dashboard based on role
+    if (isLoggedIn) {
+      if (role === 'contributor') {
+        navigate('/'); // Redirect to Home (which will render ContributorDashboard)
+      } else if (role === 'ngo') {
+        navigate('/dashboard/ngo');
+      }
+    }
+  }, [isLoggedIn, role, navigate]);
 
   return (
     <>
       {isLoggedIn ? (
-        <NGODashboard /> // Show NGO Dashboard content if logged in
+        role === 'contributor' ? ( // Check if the role is contributor
+          <ContributorDashboard /> // Show Contributor Dashboard if logged in as Contributor
+        ) : (
+          <NGODashboard /> // Show NGO Dashboard if logged in as NGO
+        )
       ) : (
         <div className="max-w-screen-xl mx-auto md:px-10 px-4 flex flex-col md:flex-row items-center my-10">
           <div className="w-full md:w-1/2 text-center md:text-left mb-8 md:mb-0">
