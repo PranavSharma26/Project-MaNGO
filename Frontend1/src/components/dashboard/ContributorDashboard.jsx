@@ -729,7 +729,7 @@ function ContributorDashboard() {
               Discover how your contributions are making a difference.
             </p>
             {hoveringStories && (
-              <div className="absolute top-0 left-full w-64 p-4 bg-white rounded-lg shadow-lg z-10">
+              <div className="absolute top-0 left-full w-64 p-4 pb-6 bg-white rounded-lg shadow-lg z-10">
                 <Slider {...sliderSettings}>
                   {successStoryImages.map((story, index) => (
                     <div key={index} className="p-4">
@@ -758,7 +758,7 @@ function ContributorDashboard() {
               Stay informed about events and ways to get involved.
             </p>
             {hoveringEvents && (
-              <div className="absolute top-0 left-full w-64 p-4 bg-white rounded-lg shadow-lg z-10">
+              <div className="absolute top-0 left-full w-64 p-4 pb-6 bg-white rounded-lg shadow-lg z-10">
                 <Slider {...sliderSettings}>
                   {upcomingEventsImages.map((event, index) => (
                     <div key={index} className="p-4">
