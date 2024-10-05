@@ -820,31 +820,6 @@ function ContributorDashboard() {
             Review an NGO
           </button>
         </div>
-        {/* Floating Drives Navbar
-      <div className="fixed top-0 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg z-50 py-4 px-6 flex items-center">
-        <h2 className="text-lg font-bold mr-4">Recent Drives:</h2>
-        <div className="flex overflow-hidden space-x-4 animate-slider">
-          {Array.isArray(drives) && drives.length > 0 ? (
-            drives.slice(0, 3).map((drive) => (
-              <div
-                key={drive.drive_id}
-                className="bg-white p-4 rounded-lg shadow-lg min-w-[300px] max-w-[400px]"
-              >
-                <h3 className="text-xl font-semibold mb-2 text-black">
-                  {drive.type}
-                </h3>
-                <div className="overflow-hidden whitespace-nowrap">
-                  <div className="inline-block animate-marquee">
-                    <p className="text-sm text-gray-600">{drive.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No drives available.</p>
-          )}
-        </div>
-      </div> */}
         {/* Donate Now Image */}
         <div>
           <img
