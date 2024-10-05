@@ -23,6 +23,8 @@ function ContributorDashboard() {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [drives, setDrives] = useState([]); // Initialize drives state variable
+  const navigate = useNavigate();
   const [resourceData, setResourceData] = useState({
     resource_name: "",
     resource_type: "",
@@ -41,9 +43,6 @@ function ContributorDashboard() {
     timestamp: "",
     description: "",
   });
-
-  const navigate = useNavigate();
-
   const successStoryImages = [
     {
       img: "https://tse3.mm.bing.net/th?id=OIP.S1RYMIdyDNicQVd9r8muzwHaFj&pid=Api&P=0&h=180",
@@ -73,10 +72,31 @@ function ContributorDashboard() {
       desc: "Clothing donation event on November 5th.",
     },
   ];
+
+  useEffect(() => {
+    const fetchDrives = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/api/drives"); // Use absolute URL
+        console.log("Drives response:", response.data); // Log the response data
+        if (Array.isArray(response.data)) {
+          setDrives(response.data);
+        } else {
+          console.warn("Expected an array but got:", response.data);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching drives:",
+          error.response ? error.response.data : error.message
+        );
+      }
+    };
+
+    fetchDrives();
+  }, []);
+
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
-
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -102,10 +122,10 @@ function ContributorDashboard() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const validDuration = resourceData.duration ? resourceData.duration : null;
-  
+
     const user_id = localStorage.getItem("user_id");
     console.log("User ID:", user_id); // Log user_id to check its value
-  
+
     try {
       // Step 1: Fetch user details (first name, last name) using the user_id
       const userResponse = await axios.get(
@@ -113,7 +133,7 @@ function ContributorDashboard() {
       );
       const { first_name, last_name } = userResponse.data;
       const fullName = `${first_name} ${last_name}`;
-  
+
       // Step 2: Post the resource details to the server
       const response = await axios.post("http://localhost:4000/api/resource", {
         user_id: user_id, // coming from localStorage
@@ -125,86 +145,90 @@ function ContributorDashboard() {
         duration: validDuration || null,
         time_unit: resourceData.time_unit || null,
       });
-  
+
       setShowDonateForm(false);
       console.log("Success:", response.data);
       console.log(fullName);
-  
+
       // Step 3: Emit notification to the server with the full name, type, and user_id
-      socket.emit("new_resource", { 
+      socket.emit("new_resource", {
         senderName: fullName,
         type: 1, // Type of resource (can be dynamic based on your requirement)
-        user_id: user_id // Also send the user_id along with the name and type
+        user_id: user_id, // Also send the user_id along with the name and type
       });
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
     }
   };
-  
 
   // Removed useEffect hook for fetching NGOs
-const handleCityChange = async (e) => {
-  const city = e.target.value;
-  setSelectedCity(city);
-  console.log("Selected city:", city);
+  const handleCityChange = async (e) => {
+    const city = e.target.value;
+    setSelectedCity(city);
+    console.log("Selected city:", city);
 
-  if (!city) {
-    setFilteredNgos([]); // Clear NGO list if no city is selected
-    return;
-  }
+    if (!city) {
+      setFilteredNgos([]); // Clear NGO list if no city is selected
+      return;
+    }
 
-  try {
-    setLoading(true); // Set loading state to true
-    console.log("Fetching NGOs for city:", city);
-    const response = await axios.get("http://localhost:4000/api/ngos", {
-      params: { city },
-    });
-    console.log("NGOs fetched:", response.data);
-    setFilteredNgos(response.data); // Update the filtered NGOs
-  } catch (err) {
-    console.error(
-      "Error fetching NGOs:",
-      err.response ? err.response.data : err.message
-    );
-  } finally {
-    setLoading(false); // Turn off loading state
-  }
-};
+    try {
+      setLoading(true); // Set loading state to true
+      console.log("Fetching NGOs for city:", city);
+      const response = await axios.get("http://localhost:4000/api/ngos", {
+        params: { city },
+      });
+      console.log("NGOs fetched:", response.data);
+      setFilteredNgos(response.data); // Update the filtered NGOs
+    } catch (err) {
+      console.error(
+        "Error fetching NGOs:",
+        err.response ? err.response.data : err.message
+      );
+    } finally {
+      setLoading(false); // Turn off loading state
+    }
+  };
 
-// No need to fetch NGOs inside useEffect anymore.
+  // No need to fetch NGOs inside useEffect anymore.
 
-const handleAmountSubmit = async (e) => {
-  e.preventDefault();
-  
-  const ngo_id = selectedNgo;
-  const donation_amount = parseFloat(amount); 
+  const handleAmountSubmit = async (e) => {
+    e.preventDefault();
 
-  if (isNaN(donation_amount)) {
+    const ngo_id = selectedNgo;
+    const donation_amount = parseFloat(amount);
+
+    if (isNaN(donation_amount)) {
       console.error("Donation not found");
       return;
-  }
-  if (!ngo_id) {
+    }
+    if (!ngo_id) {
       console.error("NGO Id not found");
       return;
-  }
+    }
 
-  try {
+    try {
       // Fetch donor_id using the NGO ID
-      const donorResponse = await axios.get(`http://localhost:4000/api/donor/${ngo_id}`);
+      const donorResponse = await axios.get(
+        `http://localhost:4000/api/donor/${ngo_id}`
+      );
       const donor_id = donorResponse.data[0].user_id; // Assuming donor ID is in the first object
 
       const response = await axios.post("http://localhost:4000/api/donate", {
-          donor_id,
-          ngo_id,
-          donation_amount,
+        donor_id,
+        ngo_id,
+        donation_amount,
       });
 
       console.log("Donation successful:", response.data);
       setShowAmountForm(false);
-  } catch (err) {
-      console.error("Error submitting donation:", err.response ? err.response.data : err.message);
-  }
-};
+    } catch (err) {
+      console.error(
+        "Error submitting donation:",
+        err.response ? err.response.data : err.message
+      );
+    }
+  };
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
@@ -212,7 +236,7 @@ const handleAmountSubmit = async (e) => {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
-        // Step 1: Fetch user details (first name, last name) using the user_id
+      // Step 1: Fetch user details (first name, last name) using the user_id
       const userResponse = await axios.get(
         `http://localhost:4000/api/users/${user_id}`
       );
@@ -229,10 +253,10 @@ const handleAmountSubmit = async (e) => {
       console.log("Success:", response.data);
       console.log(fullName);
       // Step 3: Emit notification to the server with the full name, type, and user_id
-      socket.emit("new_resource", { 
+      socket.emit("new_resource", {
         senderName: fullName,
         type: 2, // Type of resource (can be dynamic based on your requirement)
-        user_id: user_id // Also send the user_id along with the name and type
+        user_id: user_id, // Also send the user_id along with the name and type
       });
 
       console.log("Success:", response.data);
@@ -622,7 +646,7 @@ const handleAmountSubmit = async (e) => {
                 {/* Add more cities as needed */}
               </select>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">
                 Select NGO
@@ -646,7 +670,7 @@ const handleAmountSubmit = async (e) => {
                 </select>
               )}
             </div>
-            
+
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-2"
@@ -663,8 +687,6 @@ const handleAmountSubmit = async (e) => {
                 required
               />
             </div>
-
-            
 
             <button
               type="submit"
@@ -723,7 +745,6 @@ const handleAmountSubmit = async (e) => {
               </div>
             )}
           </div>
-
           {/* Upcoming Events */}
           <div
             className="bg-gray-200 p-4 rounded-lg shadow-md relative"
@@ -755,7 +776,6 @@ const handleAmountSubmit = async (e) => {
           </div>
         </div>
       </div>
-
       <div className="flex justify-between items-center mt-6">
         {/* Review Button */}
         <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-lg mr-6">
@@ -769,7 +789,25 @@ const handleAmountSubmit = async (e) => {
             Review an NGO
           </button>
         </div>
-
+        <h2 className="text-xl font-semibold mb-4">Available Drives</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.isArray(drives) && drives.length > 0 ? (
+          drives.map((drive) => (
+            <div
+              key={drive.drive_id}
+              className="bg-white p-4 rounded-lg shadow-lg"
+            >
+              <h3 className="text-lg font-semibold mb-2">{drive.type}</h3>
+              <p className="text-gray-600 mb-4">{drive.description}</p>
+              <button className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                Contribute
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No drives available.</p>
+        )}
+        </div>
         {/* Donate Now Image */}
         <div>
           <img
@@ -782,5 +820,4 @@ const handleAmountSubmit = async (e) => {
     </div>
   );
 }
-
 export default ContributorDashboard;
