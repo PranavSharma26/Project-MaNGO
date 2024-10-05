@@ -19,50 +19,89 @@ const io = new Server(server, {
     origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
   },
 })
+
+const users = {}; // Store the mapping of user_id to socket.id
+
+
 io.on("connection", (socket) => {
-  // console.log("A user connected");
+  console.log("A user connected:", socket.id); // Log connected user
+
+  // Store the user's socket ID when they connect
+  socket.on("register", (user_id) => {
+    users[user_id] = socket.id; // Associate user_id with the socket ID
+    console.log(`User registered: ${user_id} with socket ID: ${socket.id}`);
+  });
 
   socket.on("new_resource", async ({ senderName, type, user_id }) => {
     // Emit a notification to all clients
     io.emit("resource_posted", {
       name: senderName,
       typeOfContributor: type,
-    })
+    });
 
     // Create the notification message
-    let notificationMessage = "" // Use 'let' instead of 'const'
+    let notificationMessage = "";
     if (type === 1) {
-      notificationMessage = ` ${senderName} posted a Resource`
+      notificationMessage = `${senderName} posted a Resource`;
     } else if (type === 2) {
-      notificationMessage = `${senderName} posted a Service`
+      notificationMessage = `${senderName} posted a Service`;
     } else {
-      notificationMessage = `${senderName} donated money`
+      notificationMessage = `${senderName} donated money`;
     }
+
     // Insert the notification into the database
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/notification",
-        {
-          user_id,
-          notification_message: notificationMessage,
-        },
-      )
-
-      // Log the notification ID returned from the server
-      const { notification_id } = response.data
-      // console.log('Notification ID:', notification_id);
+      await axios.post("http://localhost:4000/api/notification", {
+        user_id,
+        notification_message: notificationMessage,
+      });
+      console.log("Notification for new resource sent to the database.");
     } catch (err) {
-      console.error(
-        "Error inserting notification:",
-        err.response ? err.response.data : err.message,
-      )
+      console.error("Error inserting notification:", err.response ? err.response.data : err.message);
     }
-  })
+  });
+
+  // Handle resource booking and notify only the specific user who posted the resource
+  socket.on("booked_resource", async ({ resourceId, ngoName, user_id }) => {
+    const targetSocketId = users[user_id]; // Get the socket ID for the user who posted the resource
+    console.log(ngoName);
+    console.log(user_id);
+
+    if (targetSocketId) {
+      io.to(targetSocketId).emit("resource_booked", {
+        resource: resourceId,
+        ngoN: ngoName,
+        
+      });
+
+      // Create the notification message for the booking
+      const notificationMessage = `NGO ${ngoName} has booked your resource with ID ${resourceId}`;
+
+      try {
+        await axios.post("http://localhost:4000/api/notification", {
+          user_id, // The user who posted the resource
+          notification_message: notificationMessage,
+        });
+        console.log("Booking notification sent to the user and saved in the database.");
+      } catch (err) {
+        console.error("Error inserting booking notification:", err.response ? err.response.data : err.message);
+      }
+    } else {
+      console.log("User is not connected, cannot send the notification.");
+    }
+  });
 
   socket.on("disconnect", () => {
-    console.log("Someone has left")
-  })
-})
+    // Clean up when a user disconnects
+    for (const [userId, socketId] of Object.entries(users)) {
+      if (socketId === socket.id) {
+        delete users[userId]; // Remove user_id from users object
+        console.log(`User disconnected: ${userId}`);
+        break;
+      }
+    }
+  });
+});
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -313,12 +352,15 @@ app.post("/api/login/ngo", async (req, res) => {
       process.env.JWT_SECRET || "1234",
       { expiresIn: "1h" },
     )
-    res.status(200).json({ message: "Login successful", token })
+    // Respond with token and ngo_id
+    res.status(200).json({ message: "Login successful", token, ngo_id: user.user_id });
   } catch (err) {
     console.error("Error during NGO login:", err)
     return res.status(500).json({ message: "Server error" })
   }
 })
+
+
 // API route to handle notification into table
 app.post("/api/notification", (req, res) => {
   const { user_id, notification_message } = req.body
@@ -505,29 +547,49 @@ app.get("/api/resources/other", (req, res) => {
   })
 })
 
-// Booking resource route
 app.patch("/api/resources/book/:id", async (req, res) => {
-  const resourceId = req.params.id
+  const resourceId = req.params.id;
 
   try {
-    const updateQuery =
-      "UPDATE resource SET status = ? WHERE resource_id = ? AND status = ?"
-    const values = ["booked", resourceId, "available"]
+    // First, update the resource status to 'booked'
+    const updateQuery = `
+      UPDATE resource 
+      SET status = ? 
+      WHERE resource_id = ? AND status = ?;
+    `;
+    const values = ["booked", resourceId, "available"];
 
-    const [result] = await connection.promise().query(updateQuery, values)
+    const [result] = await connection.promise().query(updateQuery, values);
 
     if (result.affectedRows === 0) {
       return res
         .status(404)
-        .json({ message: "Resource not found or already booked" })
+        .json({ message: "Resource not found or already booked" });
     }
 
-    res.status(200).json({ message: "Resource booked successfully" })
+    // Now, fetch the user_id of the person who posted the resource
+    const userQuery = `
+      SELECT user_id 
+      FROM resource 
+      WHERE resource_id = ?;
+    `;
+    const [userResult] = await connection.promise().query(userQuery, [resourceId]);
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+
+    const { user_id } = userResult[0]; // Get user_id from the query result
+
+    // Send back a success message along with the user_id
+    res.status(200).json({ message: "Resource booked successfully", user_id });
+
   } catch (error) {
-    console.error("Error booking resource:", error)
-    res.status(500).json({ message: "Failed to book the resource" })
+    console.error("Error booking resource:", error);
+    res.status(500).json({ message: "Failed to book the resource" });
   }
-})
+});
+
 
 app.post("/api/donate", async (req, res) => {
   const { donor_id, ngo_id, donation_amount } = req.body

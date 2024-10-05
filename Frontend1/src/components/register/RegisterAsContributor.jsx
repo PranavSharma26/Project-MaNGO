@@ -4,6 +4,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { Link } from 'react-router-dom';
 
+import io from "socket.io-client";
+
+const socket = io("http://localhost:4000");
+
 function RegisterAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [emailError, setEmailError] = React.useState(""); // State for email error
@@ -25,12 +29,18 @@ function RegisterAsContributor() {
     };
 
     try {
+
       const response = await axios.post("http://localhost:4000/api/register", userInfo);
       console.log("Response:", response.data.message);
 
       // Clear previous errors on successful registration
       setEmailError("");
       setContactError("");
+
+    const user_id = localStorage.getItem("user_id");
+    console.log("User ID:", user_id); // Log user_id to check its value
+
+      socket.emit("register", user_id);
 
       // Redirect to the home page after successful registration
       navigate("/"); // Change "/home" to your home page route

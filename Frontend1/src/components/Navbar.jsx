@@ -14,33 +14,47 @@ const Navbar = () => {
   // Socket.io for real-time notifications
   useEffect(() => {
     const socket = io("http://localhost:4000"); // Replace with your server address
-  
+
     // Listen for new resource postings
     socket.on('resource_posted', (data) => {
       console.log("Incoming data:", data); // Log the incoming data
-  
+
       const personName = data.name; // Adjust this according to the actual property that holds the name
       const type = data.typeOfContributor;
       let notificationMessage = "";
-  
+
       if (type === 1) {
         notificationMessage = `A new resource has been posted by ${personName}`;
       } else if (type === 2) {
         notificationMessage = `A new service has been posted by ${personName}`;
       } else {
-        notificationMessage = `A new service has been posted by ${personName}`; // Optional else block
+        notificationMessage = `A new donation has been made by ${personName}`;
       }
-  
+
       // Prepend new notifications instead of appending
       setNotifications((prevNotifications) => [notificationMessage, ...prevNotifications]);
-  
       setHasUnread(true); // Mark notifications as unread when a new one arrives
     });
-  
+
+    // Listen for resource booking notifications
+    socket.on('resource_booked', (data) => {
+      console.log("Booking notification:", data); // Log the incoming booking notification
+
+      const { resourceId, ngoName } = data;
+      const notificationMessage = `NGO ${ngoName} has booked your resource with ID ${resourceId}`;
+
+      // Prepend booking notification
+      setNotifications((prevNotifications) => [notificationMessage, ...prevNotifications]);
+      setHasUnread(true); // Mark notifications as unread when a new booking arrives
+    });
+
+    // Clean up the socket connection
     return () => {
       socket.off('resource_posted');
+      socket.off('resource_booked');
     };
-  }, []);
+  }, []); // Empty dependency array to set up the socket connection once
+
   
 
   // Toggle the dropdown visibility and mark notifications as read

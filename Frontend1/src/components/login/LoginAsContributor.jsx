@@ -27,7 +27,7 @@ function LoginAsContributor() {
         localStorage.setItem('user_id', user_id);
         
         login(token, userRole); // Pass userRole to login function
-        navigate('/'); // Redirect to Home instead of Contributor Dashboard
+        // navigate('/'); // Redirect to Home instead of Contributor Dashboard
       } else {
         console.error("Login failed: No token or user_id received");
       }

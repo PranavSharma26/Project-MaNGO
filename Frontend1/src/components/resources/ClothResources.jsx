@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import io from "socket.io-client";
+import axios from 'axios'; // Import axios for making HTTP requests
+
+const socket = io("http://localhost:4000");
+
 const ClothResources = () => {
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,25 +34,57 @@ const ClothResources = () => {
         const confirmBooking = window.confirm('Are you sure you want to book this resource?');
         if (!confirmBooking) return;
 
+        
+        // ngo_id (retrieving from localStorage)
+        const ngo_id = localStorage.getItem("ngo_id");
+        console.log("NGO ID:", ngo_id); 
+    
         try {
+            // Step 1: Fetch user details (first name, last name) using the user_id
+            const userResponse = await axios.get(
+                `http://localhost:4000/api/users/${ngo_id}`
+            );
+            const { first_name, last_name } = userResponse.data;
+            const fullName = `${first_name} ${last_name}`;
+
+
             const response = await fetch(`http://localhost:4000/api/resources/book/${resourceId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-
+    
             if (!response.ok) {
                 throw new Error('Failed to book the resource');
             }
+    
+            // Parse the response to get user_id
+            const data = await response.json();
+            const { user_id } = data;
 
+            console.log(`provider Id : ${user_id}`);
+    
+         
+    
             // Remove the booked resource from the list
             setResources(prevResources => prevResources.filter(resource => resource.resource_id !== resourceId));
+    
+            // Emit notification to server using socket.io
+            socket.emit("booked_resource", {
+                resourceId: resourceId,
+                ngoName : fullName,
+                user_id: user_id, // user_id of the person who posted the resource
+            });
+    
+            console.log("Booking and notification sent successfully");
+    
         } catch (error) {
             console.error('Error booking resource:', error);
             setError(error);
         }
     };
+    
 
     if (loading) return <p className="text-center">Loading resources...</p>;
     if (error) return <p className="text-red-500 text-center">Error fetching resources: {error.message}</p>;
