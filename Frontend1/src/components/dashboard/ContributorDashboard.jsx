@@ -170,13 +170,13 @@ function ContributorDashboard() {
     const city = e.target.value;
     setSelectedCity(city);
     console.log("Selected city:", city);
-
+  
     if (!city) {
       setFilteredNgos([]); // Clear NGO list if no city is selected
       setOriginalNgos([]); // Clear the original NGOs if no city is selected
       return;
     }
-
+  
     try {
       setLoading(true); // Set loading state to true
       console.log("Fetching NGOs for city:", city);
@@ -195,16 +195,13 @@ function ContributorDashboard() {
       setLoading(false); // Turn off loading state
     }
   };
-
-
-  // No need to fetch NGOs inside useEffect anymore.
-
+  
   const handleAmountSubmit = async (e) => {
     e.preventDefault();
-
+  
     const ngo_id = selectedNgo;
     const donation_amount = parseFloat(amount);
-
+  
     if (isNaN(donation_amount)) {
       console.error("Donation not found");
       return;
@@ -213,20 +210,20 @@ function ContributorDashboard() {
       console.error("NGO Id not found");
       return;
     }
-
+  
     try {
       // Fetch donor_id using the NGO ID
       const donorResponse = await axios.get(
         `http://localhost:4000/api/donor/${ngo_id}`
       );
       const donor_id = donorResponse.data[0].user_id; // Assuming donor ID is in the first object
-
+  
       const response = await axios.post("http://localhost:4000/api/donate", {
         donor_id,
         ngo_id,
         donation_amount,
       });
-
+  
       console.log("Donation successful:", response.data);
       setShowAmountForm(false);
     } catch (err) {
@@ -236,19 +233,16 @@ function ContributorDashboard() {
       );
     }
   };
-
+  
   const handleSearch = (searchTerm) => {
     // Filter NGOs based on search term
-    const filtered = filteredNgos.filter((ngo) =>
+    const filtered = originalNgos.filter((ngo) =>
       `${ngo.first_name} - ${ngo.address}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
     setFilteredNgos(filtered);
-  };
-  
-  
-
+  };  
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
@@ -295,7 +289,7 @@ function ContributorDashboard() {
         <span className="text-pink-600">Meaningful</span>
         <span className="text-blue-600"> Change</span>
       </h1>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
         <div
           onClick={() => setShowDonateForm(true)}
@@ -334,7 +328,7 @@ function ContributorDashboard() {
           </div>
         </div>
       </div>
-
+      
       {showDonateForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex      justify-center items-center z-50">
           <form
@@ -676,7 +670,10 @@ function ContributorDashboard() {
               type="text"
               value={selectedNgoDisplay} // Display the selected NGO name
               placeholder="Select an NGO..."
-              onChange={(e) => handleSearch(e.target.value)} // Call the search handler
+              onChange={(e) => {
+                setSelectedNgoDisplay(e.target.value); // Update the display value
+                handleSearch(e.target.value); // Call the search handler
+              }} // Update both display and search results
               className="w-full p-2 border border-gray-300 rounded-md mb-2"
             />
 
@@ -732,8 +729,6 @@ function ContributorDashboard() {
     </form>
   </div>
 )}
-
-
 
 
       {/* Additional Dynamic Content */}
@@ -819,25 +814,6 @@ function ContributorDashboard() {
           >
             Review an NGO
           </button>
-        </div>
-        <h2 className="text-xl font-semibold mb-4">Available Drives</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.isArray(drives) && drives.length > 0 ? (
-            drives.map((drive) => (
-              <div
-                key={drive.drive_id}
-                className="bg-white p-4 rounded-lg shadow-lg"
-              >
-                <h3 className="text-lg font-semibold mb-2">{drive.type}</h3>
-                <p className="text-gray-600 mb-4">{drive.description}</p>
-                <button className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                  Contribute
-                </button>
-              </div>
-            ))
-          ) : (
-            <p>No drives available.</p>
-          )}
         </div>
         {/* Donate Now Image */}
         <div>
