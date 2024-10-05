@@ -32,35 +32,6 @@ function NGODashboard() {
 
 
 
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  // Function to handle booking the service
  const handleBookService = async (service_id) => {
   const confirmBooking = window.confirm("Are you sure you want to book this service?");
@@ -79,43 +50,15 @@ function NGODashboard() {
       throw new Error('Failed to book the service');
     }
     
-    const result = await response.json();
+    // const result = await response.json();
 
     // Remove the booked service from the list
-    setServices((prevServices) => prevServices.filter(service => service.service_id !== service_id));
+    setSearchResults((prevResults) => prevResults.filter(service => service.service_id !== service_id));
     alert('Service booked successfully!');
   } catch (error) {
     console.error('Error booking service:', error.message);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // Function to handle booking the resource
   const handleBookResource = async (resource_id) => {
@@ -124,7 +67,7 @@ function NGODashboard() {
 
     try {
       const response = await fetch(`http://localhost:4000/api/resources/book/${resource_id}`, {
-        method: 'POST', // Changed from POST to PATCH
+        method: 'PATCH', // Changed from POST to PATCH
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -135,9 +78,9 @@ function NGODashboard() {
         throw new Error('Failed to book the resource');
       }
       
-      const result = await response.json();
+    
       // Remove the booked resource from the list
-      setResources((prevResources) => prevResources.filter(resource => resource.resource_id !== resource_id));
+      setSearchResults((prevResults) => prevResults.filter(resource => resource.resource_id !== resource_id));
       alert('Resource booked successfully!');
     } catch (error) {
       console.error('Error booking resource:', error.message);
