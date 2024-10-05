@@ -642,6 +642,44 @@ app.post("/api/review", verifyToken, async (req, res) => {
     })
   }
 })
+app.get('/api/resources/search', (req, res) => {
+  const { search, category } = req.query;
+
+  // Check if search query is provided
+  if (!search) {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
+
+  try {
+    // SQL query for searching resource names and optionally filtering by resource type (category)
+    let sqlQuery = 'SELECT * FROM resource WHERE status="available" and UPPER(resource_name) LIKE ?'; // Case-insensitive search
+    const queryParams = [`%${search.toUpperCase()}%`]; // Match any part of the resource name
+
+    // Add category filter if provided
+    if (category) {
+      sqlQuery += ' AND resource_type = ?';
+      queryParams.push(category);
+    }
+
+    // Execute the query
+    connection.query(sqlQuery, queryParams, (err, results) => {
+      if (err) {
+        console.error('Error executing the query:', err.message);
+        return res.status(500).json({ error: 'Database query failed', details: err.message }); // JSON response on error
+      }
+
+      // Return the search results
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(404).json({ error: 'No resources found matching the criteria' });
+      }
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error.message);
+    return res.status(500).json({ error: 'Unexpected server error', details: error.message }); // JSON error response
+  }
+});
 
 app.post('/api/post-drive', verifyToken, (req, res) => {
   const { drive_name, description, drive_type, start_date, end_date } = req.body;
