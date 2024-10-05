@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink,useNavigate } from 'react-router-dom';
 
 function NGODashboard() {
   const [services, setServices] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [token, setToken] = useState(localStorage.getItem('token'));
-
+  const navigate = useNavigate();
+  const handlePostDrive = () => {
+    navigate('/post-drive');
+  };
   // Fetch posted services from the backend
   useEffect(() => {
     const fetchServices = async () => {
@@ -77,6 +80,15 @@ function NGODashboard() {
 
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen">
+      <nav className="flex justify-between items-center bg-white p-4 shadow-md">
+        <h1 className="text-2xl font-bold">NGO Dashboard</h1>
+        <button
+          onClick={handlePostDrive}
+          className="py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+        >
+          Post a Drive
+        </button>
+      </nav>
       <div className="flex flex-col lg:flex-row">
         {/* Left Section: Search Bar */}
         <div className="w-full lg:w-1/4 p-4 bg-white rounded-lg shadow-lg mb-6 lg:mb-0 lg:mr-6">
