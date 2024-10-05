@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-
 function NGODashboard() {
   const [services, setServices] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
