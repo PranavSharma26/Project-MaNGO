@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink,useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 function NGODashboard() {
   const [services, setServices] = useState([]);
@@ -80,7 +80,7 @@ function NGODashboard() {
 
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen">
-      <nav className="flex justify-between items-center bg-white p-4 shadow-md">
+      <nav className="flex justify-between items-center mb-2 bg-white p-4 shadow-md">
         <h1 className="text-2xl font-bold">NGO Dashboard</h1>
         <button
           onClick={handlePostDrive}
@@ -131,7 +131,7 @@ function NGODashboard() {
         {/* Right Section: Content Box */}
         <div className="flex-1 bg-white p-4 rounded-lg shadow-lg">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Categories</h2>
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 sm:flex gap-6">
             {/* Food Card */}
             <div className="bg-white p-4 rounded-lg shadow-lg flex-1">
               <NavLink to="/resources/food">
@@ -181,18 +181,20 @@ function NGODashboard() {
           {/* Posted Services Section */}
           <div className="mt-8">
             <h2 className="text-lg sm:text-xl font-semibold mb-4">Posted Services</h2>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {services.length === 0 ? (
                 <p>No services posted yet.</p>
               ) : (
                 services.map((service) => (
-                  <div key={service.service_id} className="bg-white p-4 rounded-lg shadow-lg">
-                    <h3 className="text-lg sm:text-xl font-semibold mb-2">Service Type: {service.service_type}</h3>
-                    <p className="text-gray-600 mb-4">Description: {service.description}</p>
-                    <p className="text-gray-500">Status: {service.status}</p>
-                    <p className="text-gray-500">Posted by: {service.user_id}</p>
-                    <p className="text-gray-500">Name: {service.user_name}</p>
-                    <p className="text-gray-500">Timestamp: {service.timestamp}</p>
+                  <div key={service.service_id} className="bg-white p-4 rounded-lg shadow-lg flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-semibold mb-2">Service Type: {service.service_type}</h3>
+                      <p className="text-gray-600 mb-4">Description: {service.description}</p>
+                      <p className="text-gray-500">Status: {service.status}</p>
+                      <p className="text-gray-500">Posted by: {service.user_id}</p>
+                      <p className="text-gray-500">Name: {service.user_name}</p>
+                      <p className="text-gray-500">Timestamp: {service.timestamp}</p>
+                    </div>
 
                     {/* Book button: Only show if status is 'available' */}
                     {service.status === 'available' && (
