@@ -23,6 +23,7 @@ import FoodResources from './components/resources/FoodResources';
 import ReviewNGO from './components/dashboard/ReviewNGO';
 import ClothResources from './components/resources/ClothResources';
 import OtherResources from './components/resources/OtherResources';
+import PostDrive from './components/dashboard/PostDrive';  // Import the new PostDrive component
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
             <Route path="/resources/food" element={<FoodResources />} />
             <Route path="/resources/clothes" element={<ClothResources />} />
             <Route path="/resources/other" element={<OtherResources />} />
+            <Route path="/post-drive" element={<ProtectedRoute component={PostDrive} />} /> {/* Added PostDrive route */}
           </Routes>
         </main>
         <Footer />
