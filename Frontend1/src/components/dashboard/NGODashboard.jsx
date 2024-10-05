@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-
 function NGODashboard() {
   const [services, setServices] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -26,40 +25,6 @@ function NGODashboard() {
 
     fetchServices();
   }, []);
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
  // Function to handle booking the service
  const handleBookService = async (service_id) => {
@@ -88,35 +53,6 @@ function NGODashboard() {
     console.error('Error booking service:', error.message);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Function to handle booking the resource
   const handleBookResource = async (resource_id) => {
     const confirmBooking = window.confirm("Are you sure you want to book this resource?");
