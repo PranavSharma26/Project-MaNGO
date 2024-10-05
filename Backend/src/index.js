@@ -338,12 +338,10 @@ app.post("/api/notification", (req, res) => {
         .send({ message: "Error inserting notification", error: err })
     }
     // The notification_id is the auto-incremented ID from the database
-    res
-      .status(201)
-      .send({
-        message: "Notification added successfully",
-        notification_id: result.insertId,
-      })
+    res.status(201).send({
+      message: "Notification added successfully",
+      notification_id: result.insertId,
+    })
   })
 })
 // API route to handle resource form submissions
@@ -383,12 +381,10 @@ app.post("/api/resource", (req, res) => {
         .status(500)
         .send({ message: "Error inserting resource", error: err })
     }
-    res
-      .status(201)
-      .send({
-        message: "Resource added successfully",
-        resource_id: result.insertId,
-      })
+    res.status(201).send({
+      message: "Resource added successfully",
+      resource_id: result.insertId,
+    })
   })
 })
 
@@ -412,12 +408,10 @@ app.post("/api/service", (req, res) => {
         .status(500)
         .send({ message: "Error inserting service", error: err })
     }
-    res
-      .status(201)
-      .send({
-        message: "Service added successfully",
-        service_id: result.insertId,
-      })
+    res.status(201).send({
+      message: "Service added successfully",
+      service_id: result.insertId,
+    })
   })
 })
 app.get("/api/profile", verifyToken, (req, res) => {
@@ -642,12 +636,10 @@ app.post("/api/review", verifyToken, async (req, res) => {
     }
   } catch (error) {
     console.error("Error submitting review:", error.message)
-    res
-      .status(500)
-      .json({
-        message: "Server error while submitting review.",
-        error: error.message,
-      })
+    res.status(500).json({
+      message: "Server error while submitting review.",
+      error: error.message,
+    })
   }
 })
 app.get('/api/resources/search', (req, res) => {
@@ -688,6 +680,39 @@ app.get('/api/resources/search', (req, res) => {
     return res.status(500).json({ error: 'Unexpected server error', details: error.message }); // JSON error response
   }
 });
+
+app.post('/api/post-drive', verifyToken, (req, res) => {
+  const { drive_name, description, drive_type, start_date, end_date } = req.body;
+  const ngo_id = req.userId; // Assuming the userId corresponds to the NGO ID
+
+  // Check if required fields are present
+  if (!drive_name || !description || !drive_type || !start_date || !end_date) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  const query = `INSERT INTO Drives (ngo_id, drive_name, description, drive_type, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)`;
+  connection.query(query, [ngo_id, drive_name, description, drive_type, start_date, end_date], (err, result) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.status(200).json({ message: 'Drive posted successfully' });
+  });
+});
+
+app.get('/api/drives', (req, res) => {
+  const query = 'SELECT * FROM Drives WHERE status = "ongoing"';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    console.log('Fetched drives:', results); // Log the results for debugging
+    res.status(200).json(results);
+  });
+});
+
+
 
 // Start the server with Socket.IO
 server.listen(port, () => {

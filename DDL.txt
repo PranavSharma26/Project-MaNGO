@@ -1,5 +1,4 @@
 use register;
-
 CREATE TABLE Users (
    user_id VARCHAR(20) PRIMARY KEY,  -- Use VARCHAR to store IDs with prefixes
    user_type VARCHAR(1),
@@ -14,35 +13,30 @@ CREATE TABLE Users (
    CONSTRAINT chk_contact CHECK (LENGTH(contact) BETWEEN 10 AND 15),
    CONSTRAINT chk_email CHECK (email LIKE '%@%._%')
 );
-
 CREATE TABLE ServiceProvider (
     user_id VARCHAR(50) PRIMARY KEY,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE Donor (
     user_id VARCHAR(50) PRIMARY KEY,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE ResourceProvider (
     user_id VARCHAR(50) PRIMARY KEY,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE Contributor (
     contributor_id VARCHAR(50) PRIMARY KEY,
     FOREIGN KEY (contributor_id) REFERENCES Users(user_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE resource (
   resource_id INT PRIMARY KEY AUTO_INCREMENT,  -- Auto-incremented resource ID
   user_id VARCHAR(50) NOT NULL,
@@ -58,26 +52,24 @@ CREATE TABLE resource (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
+drop table service;
 CREATE TABLE Service (
-       service_id INT AUTO_INCREMENT PRIMARY KEY,
-       user_id VARCHAR(50) NOT NULL,
-       timestamp VARCHAR(50), 
-       -- timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       service_type VARCHAR(255) NOT NULL,
-       description TEXT,    
-       status ENUM('available', 'unavailable') DEFAULT 'available',  -- Add status column
-       FOREIGN KEY (user_id) REFERENCES users(user_id)
-       ON DELETE CASCADE
-       ON UPDATE CASCADE
-   );
+        service_id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id VARCHAR(50) NOT NULL, 
+        timestamp VARCHAR(50), 
+        service_type VARCHAR(255) NOT NULL,
+        description TEXT,    
+        status ENUM('available', 'unavailable') DEFAULT 'available',  -- Add status column
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+    );
 CREATE TABLE NGO (
     ngo_id VARCHAR(50) PRIMARY KEY,
     FOREIGN KEY (ngo_id) REFERENCES Users(user_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE Notification (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL,
@@ -87,7 +79,6 @@ CREATE TABLE Notification (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE Review (
     review_id VARCHAR(50) PRIMARY KEY,
     contributor_id VARCHAR(50),
@@ -97,7 +88,6 @@ CREATE TABLE Review (
     FOREIGN KEY (contributor_id) REFERENCES Users(user_id),
     FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)
 );
-
 CREATE TABLE Receives (
     ngo_id VARCHAR(50) PRIMARY KEY,
     notification_id INT NOT NULL,  -- Changed to INT to match Notification table
@@ -128,10 +118,22 @@ CREATE TABLE Donations (
     FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ngo_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE Drives (
+    drive_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each drive
+    ngo_id VARCHAR(50) NOT NULL,                  -- Foreign key for the NGO that posts the drive
+    drive_name VARCHAR(255) NOT NULL,             -- Name of the drive (e.g., "Food Drive", "Clothing Drive")
+    description TEXT,                             -- Description of the drive
+    drive_type ENUM('food', 'clothes', 'other') NOT NULL,  -- Type of drive (e.g., food, clothes, other)
+    start_date DATE NOT NULL,                     -- Start date of the drive
+    end_date DATE NOT NULL,                       -- End date of the drive
+    status ENUM('ongoing', 'completed', 'cancelled') DEFAULT 'ongoing', -- Status of the drive
+    FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)   -- Link to the NGO that created the drive
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
 
 ALTER TABLE Review DROP PRIMARY KEY;
 ALTER TABLE Review MODIFY review_id INT AUTO_INCREMENT PRIMARY KEY;
-
 select * from users;
 select * from Donor;
 select * from PaymentGateway;
@@ -143,7 +145,7 @@ select * from service;
 select * from notification;
 describe review;
 select * from review;
-
+select * from Drives;
 -- kuch bhi dikkat ho toh bich mai chala dena isko
 SELECT user_id 
 FROM users 
@@ -153,7 +155,3 @@ FROM users
 WHERE user_type = 'N' AND user_id NOT IN (SELECT ngo_id FROM NGO);
 INSERT INTO Contributor (contributor_id) VALUES ('user_id_here');
 INSERT INTO NGO (ngo_id) VALUES ('user_id_here');
-
-
-
-
