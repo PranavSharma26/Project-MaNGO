@@ -1,4 +1,3 @@
-// components/LoginAsNgo.jsx
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom'; 
@@ -42,6 +41,7 @@ function LoginAsNgo() {
       }
     }
   };
+
 
   return (
     <div className="min-h-[500px] flex items-center justify-center bg-gray-100">

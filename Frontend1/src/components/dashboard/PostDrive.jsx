@@ -1,5 +1,11 @@
 import { useState } from 'react';
 
+
+import io from "socket.io-client";
+import axios from "axios";
+const socket = io("http://localhost:4000");
+
+
 function PostDriveForm() {
   const [driveData, setDriveData] = useState({
     drive_name: '',
@@ -23,7 +29,27 @@ function PostDriveForm() {
       });
 
       if (response.ok) {
+      
         alert('Drive posted successfully');
+        // ngo_id (retrieving from localStorage)
+        const ngo_id = localStorage.getItem("ngo_id");
+        console.log("NGO ID:", ngo_id);
+
+      // Fetch NGO details (first name, last name) using the ngo_id
+      const userResponse = await axios.get(
+        `http://localhost:4000/api/users/${ngo_id}`
+      );
+      const { first_name, last_name } = userResponse.data;
+      const fullName = `${first_name} ${last_name}`;
+
+      console.log(fullName);
+
+
+      // now emitt notification to server with ngo name who posted this drive
+
+        socket.emit("DriveNotification", {
+            senderName: fullName                // the NGO who posted this drive
+        })
         setDriveData({
           drive_name: '',
           description: '',

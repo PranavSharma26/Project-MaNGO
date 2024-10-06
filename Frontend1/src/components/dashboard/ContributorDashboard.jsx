@@ -21,9 +21,13 @@ function ContributorDashboard() {
   const [amount, setAmount] = useState(0);
   const [filteredNgos, setFilteredNgos] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
+  const [originalNgos, setOriginalNgos] = useState([]); // New state variable to hold the original NGO list
+  const [selectedNgoDisplay, setSelectedNgoDisplay] = useState(""); // New state variable for displaying selected NGO
+
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [drives, setDrives] = useState([]); // Initialize drives state variable
+
   const navigate = useNavigate();
   const [resourceData, setResourceData] = useState({
     resource_name: "",
@@ -166,12 +170,13 @@ function ContributorDashboard() {
     const city = e.target.value;
     setSelectedCity(city);
     console.log("Selected city:", city);
-
+  
     if (!city) {
       setFilteredNgos([]); // Clear NGO list if no city is selected
+      setOriginalNgos([]); // Clear the original NGOs if no city is selected
       return;
     }
-
+  
     try {
       setLoading(true); // Set loading state to true
       console.log("Fetching NGOs for city:", city);
@@ -180,6 +185,7 @@ function ContributorDashboard() {
       });
       console.log("NGOs fetched:", response.data);
       setFilteredNgos(response.data); // Update the filtered NGOs
+      setOriginalNgos(response.data); // Save the original list of NGOs
     } catch (err) {
       console.error(
         "Error fetching NGOs:",
@@ -189,15 +195,13 @@ function ContributorDashboard() {
       setLoading(false); // Turn off loading state
     }
   };
-
-  // No need to fetch NGOs inside useEffect anymore.
-
+  
   const handleAmountSubmit = async (e) => {
     e.preventDefault();
-
+  
     const ngo_id = selectedNgo;
     const donation_amount = parseFloat(amount);
-
+  
     if (isNaN(donation_amount)) {
       console.error("Donation not found");
       return;
@@ -206,20 +210,20 @@ function ContributorDashboard() {
       console.error("NGO Id not found");
       return;
     }
-
+  
     try {
       // Fetch donor_id using the NGO ID
       const donorResponse = await axios.get(
         `http://localhost:4000/api/donor/${ngo_id}`
       );
       const donor_id = donorResponse.data[0].user_id; // Assuming donor ID is in the first object
-
+  
       const response = await axios.post("http://localhost:4000/api/donate", {
         donor_id,
         ngo_id,
         donation_amount,
       });
-
+  
       console.log("Donation successful:", response.data);
       setShowAmountForm(false);
     } catch (err) {
@@ -229,6 +233,16 @@ function ContributorDashboard() {
       );
     }
   };
+  
+  const handleSearch = (searchTerm) => {
+    // Filter NGOs based on search term
+    const filtered = originalNgos.filter((ngo) =>
+      `${ngo.first_name} - ${ngo.address}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+    setFilteredNgos(filtered);
+  };  
 
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
@@ -275,7 +289,7 @@ function ContributorDashboard() {
         <span className="text-pink-600">Meaningful</span>
         <span className="text-blue-600"> Change</span>
       </h1>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
         <div
           onClick={() => setShowDonateForm(true)}
@@ -314,7 +328,7 @@ function ContributorDashboard() {
           </div>
         </div>
       </div>
-
+      
       {showDonateForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex      justify-center items-center z-50">
           <form
@@ -611,99 +625,111 @@ function ContributorDashboard() {
         </div>
       )}
 
-      {showAmountForm && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
-          <form
-            onSubmit={handleAmountSubmit}
-            className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative"
-          >
-            <h2 className="text-3xl font-bold mb-4">Donate Amount</h2>
+{showAmountForm && (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
+    <form
+      onSubmit={handleAmountSubmit}
+      className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative"
+    >
+      <h2 className="text-3xl font-bold mb-4">Donate Amount</h2>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2" htmlFor="city">
-                Select City
-              </label>
-              <select
-                id="city"
-                value={selectedCity}
-                onChange={handleCityChange}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              >
-                <option value="">Select a city</option>
-                {/* Add options for cities */}
-                <option value="Indore">Indore</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Banglore">Banglore</option>
-                <option value="Kolkata">Kolkata</option>
-                <option value="Chennai">Chennai</option>
-                <option value="Hyderabad">Hyderabad</option>
-                <option value="Pune">Pune</option>
-                <option value="Ahmedabad">Ahmedabad</option>
-                <option value="Jaipur">Jaipur</option>
-                <option value="Surat">Surat</option>
-                {/* Add more cities as needed */}
-              </select>
-            </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2" htmlFor="city">
+          Select City
+        </label>
+        <select
+          id="city"
+          value={selectedCity}
+          onChange={handleCityChange}
+          className="w-full p-2 border border-gray-300 rounded-md"
+          required
+        >
+          <option value="">Select a city</option>
+          <option value="Indore">Indore</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Banglore">Banglore</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Pune">Pune</option>
+          <option value="Ahmedabad">Ahmedabad</option>
+          <option value="Jaipur">Jaipur</option>
+          <option value="Surat">Surat</option>
+        </select>
+      </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Select NGO
-              </label>
-              {loading ? (
-                <p>Loading NGOs...</p>
-              ) : (
-                <select
-                  id="ngo"
-                  value={selectedNgo || ""}
-                  onChange={(e) => setSelectedNgo(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="">Select an NGO</option>
-                  {filteredNgos.map((ngo, index) => (
-                    <option key={ngo.user_id || index} value={ngo.user_id}>
-                      {ngo.first_name} - {ngo.address}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+      <div className="mb-4 relative">
+        <label className="block text-sm font-medium mb-2">Select NGO</label>
+        {loading ? (
+          <p>Loading NGOs...</p>
+        ) : (
+          <div className="relative">
+            {/* Search Input for Dropdown */}
+            <input
+              type="text"
+              value={selectedNgoDisplay} // Display the selected NGO name
+              placeholder="Select an NGO..."
+              onChange={(e) => {
+                setSelectedNgoDisplay(e.target.value); // Update the display value
+                handleSearch(e.target.value); // Call the search handler
+              }} // Update both display and search results
+              className="w-full p-2 border border-gray-300 rounded-md mb-2"
+            />
 
-            <div className="mb-4">
-              <label
-                className="block text-sm font-medium mb-2"
-                htmlFor="amount"
-              >
-                Donation Amount
-              </label>
-              <input
-                type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
+            {/* Dropdown */}
+            {filteredNgos.length > 0 && (
+              <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {filteredNgos.map((ngo, index) => (
+                  <div
+                    key={ngo.user_id || index}
+                    onClick={() => {
+                      setSelectedNgo(ngo.user_id); // Set selected NGO ID
+                      setSelectedNgoDisplay(`${ngo.first_name} - ${ngo.address}`); // Set displayed NGO name
+                      setFilteredNgos([]); // Close dropdown by clearing the filtered list
+                    }}
+                    className="cursor-pointer p-2 hover:bg-gray-100"
+                  >
+                    {ngo.first_name} - {ngo.address}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-            <button
-              type="submit"
-              className="w-full py-2 bg-pink-500 text-white rounded-md hover:bg-blue-500 transition duration-300"
-            >
-              Donate
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowAmountForm(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-            >
-              &times;
-            </button>
-          </form>
-        </div>
-      )}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2" htmlFor="amount">
+          Donation Amount
+        </label>
+        <input
+          type="number"
+          id="amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-md"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-2 bg-pink-500 text-white rounded-md hover:bg-blue-500 transition duration-300"
+      >
+        Donate
+      </button>
+      <button
+        type="button"
+        onClick={() => setShowAmountForm(false)}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+      >
+        &times;
+      </button>
+    </form>
+  </div>
+)}
+
 
       {/* Additional Dynamic Content */}
       <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
@@ -788,25 +814,6 @@ function ContributorDashboard() {
           >
             Review an NGO
           </button>
-        </div>
-        <h2 className="text-xl font-semibold mb-4">Available Drives</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.isArray(drives) && drives.length > 0 ? (
-          drives.map((drive) => (
-            <div
-              key={drive.drive_id}
-              className="bg-white p-4 rounded-lg shadow-lg"
-            >
-              <h3 className="text-lg font-semibold mb-2">{drive.type}</h3>
-              <p className="text-gray-600 mb-4">{drive.description}</p>
-              <button className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                Contribute
-              </button>
-            </div>
-          ))
-        ) : (
-          <p>No drives available.</p>
-        )}
         </div>
         {/* Donate Now Image */}
         <div>

@@ -88,6 +88,7 @@ CREATE TABLE Review (
     FOREIGN KEY (contributor_id) REFERENCES Users(user_id),
     FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)
 );
+
 CREATE TABLE Receives (
     ngo_id VARCHAR(50) PRIMARY KEY,
     notification_id INT NOT NULL,  -- Changed to INT to match Notification table
@@ -98,6 +99,7 @@ CREATE TABLE Receives (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
+
 CREATE TABLE PaymentGateway (
     gateway_id VARCHAR(50) PRIMARY KEY,
     service_fees INT,
@@ -109,6 +111,7 @@ CREATE TABLE PaymentGateway (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
+
 CREATE TABLE Donations (
     donation_id INT AUTO_INCREMENT PRIMARY KEY,
     donor_id VARCHAR(20),
@@ -118,6 +121,7 @@ CREATE TABLE Donations (
     FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ngo_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 CREATE TABLE Drives (
     drive_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each drive
     ngo_id VARCHAR(50) NOT NULL,                  -- Foreign key for the NGO that posts the drive
