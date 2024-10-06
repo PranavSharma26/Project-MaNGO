@@ -27,17 +27,18 @@ io.on("connection", (socket) => {
     io.emit("resource_posted", {
       name: senderName,
       typeOfContributor: type,
-    })
+    });
 
     // Create the notification message
-    let notificationMessage = "" // Use 'let' instead of 'const'
+    let notificationMessage = ""; // Use 'let' instead of 'const'
     if (type === 1) {
-      notificationMessage = ` ${senderName} posted a Resource`
+      notificationMessage = ` ${senderName} posted a Resource`;
     } else if (type === 2) {
-      notificationMessage = `${senderName} posted a Service`
+      notificationMessage = `${senderName} posted a Service`;
     } else {
-      notificationMessage = `${senderName} donated money`
+      notificationMessage = `${senderName} donated money`;
     }
+
     // Insert the notification into the database
     try {
       const response = await axios.post(
@@ -45,24 +46,33 @@ io.on("connection", (socket) => {
         {
           user_id,
           notification_message: notificationMessage,
-        },
-      )
+        }
+      );
 
       // Log the notification ID returned from the server
-      const { notification_id } = response.data
+      const { notification_id } = response.data;
       // console.log('Notification ID:', notification_id);
     } catch (err) {
       console.error(
         "Error inserting notification:",
-        err.response ? err.response.data : err.message,
-      )
+        err.response ? err.response.data : err.message
+      );
     }
-  })
+  });
+
+  // Handling notification for Event Drive
+  socket.on("DriveNotification", async ({ senderName }) => {
+    // Emit a notification to all clients
+    io.emit("Notification_generated", {
+      name: senderName,
+    });
+  });
 
   socket.on("disconnect", () => {
-    console.log("Someone has left")
-  })
-})
+    console.log("Someone has left");
+  });
+});
+
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -313,12 +323,14 @@ app.post("/api/login/ngo", async (req, res) => {
       process.env.JWT_SECRET || "1234",
       { expiresIn: "1h" },
     )
-    res.status(200).json({ message: "Login successful", token })
+    // Respond with token and ngo_id
+    res.status(200).json({ message: "Login successful", token, ngo_id: user.user_id });
   } catch (err) {
     console.error("Error during NGO login:", err)
     return res.status(500).json({ message: "Server error" })
   }
 })
+
 // API route to handle notification into table
 app.post("/api/notification", (req, res) => {
   const { user_id, notification_message } = req.body

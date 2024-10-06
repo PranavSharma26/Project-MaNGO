@@ -197,6 +197,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 
+import io from "socket.io-client";
+
+const socket = io("http://localhost:4000");
+
 function RegisterAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [emailError, setEmailError] = React.useState("");
@@ -218,6 +222,7 @@ function RegisterAsContributor() {
     };
 
     try {
+
       const response = await axios.post("http://localhost:4000/api/register", userInfo);
       console.log("Response:", response.data.message);
 
@@ -225,8 +230,13 @@ function RegisterAsContributor() {
       setEmailError("");
       setContactError("");
 
-      // Redirect to home page after successful registration
-      navigate("/");
+
+    const user_id = localStorage.getItem("user_id");
+    console.log("User ID:", user_id); // Log user_id to check its value
+
+      socket.emit("register", user_id);
+
+      navigate("/"); // Change "/home" to your home page route
 
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
@@ -244,7 +254,7 @@ function RegisterAsContributor() {
         }
       }
     }
-  };
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

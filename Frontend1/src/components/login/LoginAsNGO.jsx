@@ -18,12 +18,19 @@ function LoginAsNgo() {
 
     try {
       const response = await axios.post("http://localhost:4000/api/login/ngo", userInfo);
-      const { token } = response.data;
+      const { token, ngo_id } = response.data; // Assuming response contains ngo_id
 
-      if (token) {
-        login(token); // Use context login method
+      if (token && ngo_id) {
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('ngo_id', ngo_id); // Store ngo_id in local storage
+        
+        const userRole = 'ngo'; // Define the user role
+        login(token, userRole); // Pass userRole to the login function
+        
+        // navigate('/'); // Redirect to Home or NGO Dashboard after login
       } else {
-        alert('No token received.');
+        console.error("Login failed: No token or ngo_id received");
+        alert('Login failed. Please try again.');
       }
     } catch (error) {
       console.error("Error logging in:", error);
@@ -34,6 +41,7 @@ function LoginAsNgo() {
       }
     }
   };
+
 
   return (
     <div className="min-h-[500px] flex items-center justify-center bg-gray-100">
