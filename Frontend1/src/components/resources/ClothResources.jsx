@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import io from "socket.io-client";
+// import io from "socket.io-client";
 import axios from 'axios'; // Import axios for making HTTP requests
 
-const socket = io("http://localhost:4000");
+// const socket = io("http://localhost:4000");
+
+import socket from "/src/socket";  // Adjust path if needed
 
 const ClothResources = () => {
     const [resources, setResources] = useState([]);

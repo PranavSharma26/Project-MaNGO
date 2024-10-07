@@ -2,7 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import bellIcon from '../assets/image.png';  // Import the bell icon image
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
+import socket from "/src/socket";  // Adjust path if needed
+
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useContext(AuthContext);
@@ -11,12 +13,9 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false); // State for dropdown visibility
   const [hasUnread, setHasUnread] = useState(false); // Track if there are unread notifications
 
-  // Socket.io for real-time notifications
   useEffect(() => {
-    const socket = io("http://localhost:4000"); // Replace with your server address
-  
-    // Listen for new resource postings
-    socket.on('resource_posted', (data) => {
+    // Define the handler functions
+    const handleResourcePosted = (data) => {
       console.log("Incoming data:", data); // Log the incoming data
   
       const personName = data.name; // Adjust this according to the actual property that holds the name
@@ -33,12 +32,10 @@ const Navbar = () => {
   
       // Prepend new notifications instead of appending
       setNotifications((prevNotifications) => [notificationMessage, ...prevNotifications]);
-  
       setHasUnread(true); // Mark notifications as unread when a new one arrives
-    });
-
-    // Listen for DriveNotification event
-    socket.on('Notification_generated', (data) => {
+    };
+  
+    const handleDriveNotification = (data) => {
       console.log("Drive notification data:", data); // Log the incoming data for drive notification
       
       const personName = data.name;
@@ -46,16 +43,23 @@ const Navbar = () => {
   
       // Prepend the new drive notification
       setNotifications((prevNotifications) => [driveNotificationMessage, ...prevNotifications]);
-
       setHasUnread(true); // Mark notifications as unread
-    });
-
-    // Clean up the socket connection when the component is unmounted
+    };
+  
+    // Listen for new resource postings
+    socket.on('resource_posted', handleResourcePosted);
+  
+    // Listen for DriveNotification event
+    socket.on('Notification_generated', handleDriveNotification);
+  
+    // Clean up the socket connection and remove event listeners when the component is unmounted
     return () => {
+      socket.off('resource_posted', handleResourcePosted);
+      socket.off('Notification_generated', handleDriveNotification);
       socket.disconnect();
     };
   }, []);
-
+  
   
 
   // Toggle the dropdown visibility and mark notifications as read

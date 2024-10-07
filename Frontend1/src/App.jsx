@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Add useEffect import
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -24,8 +24,23 @@ import ReviewNGO from './components/dashboard/ReviewNGO';
 import ClothResources from './components/resources/ClothResources';
 import OtherResources from './components/resources/OtherResources';
 import PostDrive from './components/dashboard/PostDrive';  // Import the new PostDrive component
+import socket from "./socket";  // Corrected path, ensure the path is relative to this file
 
 function App() {
+  useEffect(() => {
+    // Connect the socket once
+    console.log("Connecting socket...");
+    socket.connect(); 
+
+    // Disconnect the socket when the component unmounts
+    return () => {
+      socket.off("resource_posted");
+      socket.off("Notification_generated");
+      console.log("Disconnecting socket...");
+      socket.disconnect();
+    };
+  }, []);  // Make sure the empty dependency array is there so it runs only once
+
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen">
