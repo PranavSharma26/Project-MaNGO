@@ -6,9 +6,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from "axios";
 
-import io from "socket.io-client";
+// Import the shared socket instance
+import socket from "/src/socket";  // Adjust path if needed
 
-const socket = io("http://localhost:4000");
+
+
+// const socket = io("http://localhost:4000");
 
 function ContributorDashboard() {
   const [showDonateForm, setShowDonateForm] = useState(false);
@@ -27,6 +30,7 @@ function ContributorDashboard() {
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [drives, setDrives] = useState([]); // Initialize drives state variable
+
 
   const navigate = useNavigate();
   const [resourceData, setResourceData] = useState({
@@ -124,6 +128,7 @@ function ContributorDashboard() {
   };
 
   const handleFormSubmit = async (e) => {
+
     e.preventDefault();
     const validDuration = resourceData.duration ? resourceData.duration : null;
 
@@ -160,6 +165,8 @@ function ContributorDashboard() {
         type: 1, // Type of resource (can be dynamic based on your requirement)
         user_id: user_id, // Also send the user_id along with the name and type
       });
+
+      console.log("New resource emitted:", { senderName: fullName, type: 1, user_id })
     } catch (err) {
       console.error("Error:", err.response ? err.response.data : err.message);
     }

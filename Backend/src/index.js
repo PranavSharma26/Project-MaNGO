@@ -20,9 +20,12 @@ const io = new Server(server, {
   },
 })
 io.on("connection", (socket) => {
-  // console.log("A user connected");
+ 
+  console.log("A user has been connected", socket.id);
 
-  socket.on("new_resource", async ({ senderName, type, user_id }) => {
+  socket.on("new_resource", async (data) => {
+  const { senderName, type, user_id } = data;
+  
     // Emit a notification to all clients
     io.emit("resource_posted", {
       name: senderName,
