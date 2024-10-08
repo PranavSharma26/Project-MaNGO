@@ -88,12 +88,7 @@ io.on("connection", (socket) => {
     }
 
   });
-
-  
-
-  
-
-  socket.on("disconnect", () => {
+    socket.on("disconnect", () => {
     console.log("Someone has left");
   });
 });
@@ -120,22 +115,22 @@ connection.connect((err) => {
 })
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers["authorization"]
-  if (!token) return res.status(403).json({ error: "No token provided" })
+  const token = req.headers["authorization"];
+  if (!token) return res.status(403).json({ error: "No token provided" });
 
-  const tokenParts = token.split(" ")
+  const tokenParts = token.split(" ");
   if (tokenParts[0] !== "Bearer" || !tokenParts[1]) {
-    return res.status(401).json({ error: "Invalid token format" })
+    return res.status(401).json({ error: "Invalid token format" });
   }
 
-  const authToken = tokenParts[1]
+  const authToken = tokenParts[1];
   jwt.verify(authToken, process.env.JWT_SECRET || "1234", (err, decoded) => {
-    if (err)
-      return res.status(401).json({ error: "Failed to authenticate token" })
-    req.userId = decoded.id
-    next()
-  })
-}
+    if (err) return res.status(401).json({ error: "Failed to authenticate token" });
+    req.userId = decoded.id;
+    next();
+  });
+};
+
 
 // Endpoint to fetch all posted services
 app.get("/api/service", (req, res) => {
