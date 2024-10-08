@@ -52,9 +52,9 @@ io.on("connection", (socket) => {
         }
       );
 
-      // Log the notification ID returned from the server
-      const { notification_id } = response.data;
-      // console.log('Notification ID:', notification_id);
+      // // Log the notification ID returned from the server
+      // const { notification_id } = response.data;
+      // // console.log('Notification ID:', notification_id);
     } catch (err) {
       console.error(
         "Error inserting notification:",
@@ -64,12 +64,34 @@ io.on("connection", (socket) => {
   });
 
   // Handling notification for Event Drive
-  socket.on("DriveNotification", async ({ senderName }) => {
+  socket.on("DriveNotification", async ({ senderName, user_id }) => {
     // Emit a notification to all clients
     io.emit("Notification_generated", {
       name: senderName,
     });
+
+    // Insert the notification into the database
+    let notificationMessage = `A Event has been posted by ${senderName}`;
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/notification",
+        {
+          user_id,
+          notification_message: notificationMessage,
+        }
+      );
+    } catch (err) {
+      console.error(
+        "Error inserting notification:",
+        err.response ? err.response.data : err.message
+      );
+    }
+
   });
+
+  
+
+  
 
   socket.on("disconnect", () => {
     console.log("Someone has left");

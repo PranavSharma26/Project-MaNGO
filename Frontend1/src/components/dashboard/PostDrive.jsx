@@ -47,7 +47,8 @@ function PostDriveForm() {
       // now emitt notification to server with ngo name who posted this drive
 
         socket.emit("DriveNotification", {
-            senderName: fullName                // the NGO who posted this drive
+            senderName: fullName,                // the NGO who posted this drive
+            user_id : ngo_id,
         })
         setDriveData({
           drive_name: '',
