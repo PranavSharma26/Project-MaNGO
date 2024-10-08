@@ -42,8 +42,6 @@ function PostDriveForm() {
       const fullName = `${first_name} ${last_name}`;
 
       console.log(fullName);
-
-
       // now emitt notification to server with ngo name who posted this drive
 
         socket.emit("DriveNotification", {
@@ -103,9 +101,9 @@ function PostDriveForm() {
             required
           >
             <option value="">Select Type</option>
-            <option value="food">Food</option>
-            <option value="clothes">Clothes</option>
-            <option value="other">Other</option>
+            <option value="Charity marathon">Charity marathon</option>
+            <option value="Food drive">Food drive</option>
+            <option value="Clothing donation">Clothing donation</option>
           </select>
         </div>
 
