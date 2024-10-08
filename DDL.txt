@@ -88,7 +88,6 @@ CREATE TABLE Review (
     FOREIGN KEY (contributor_id) REFERENCES Users(user_id),
     FOREIGN KEY (ngo_id) REFERENCES NGO(ngo_id)
 );
-
 CREATE TABLE Receives (
     ngo_id VARCHAR(50) PRIMARY KEY,
     notification_id INT NOT NULL,  -- Changed to INT to match Notification table
@@ -99,7 +98,6 @@ CREATE TABLE Receives (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE PaymentGateway (
     gateway_id VARCHAR(50) PRIMARY KEY,
     service_fees INT,
@@ -111,7 +109,6 @@ CREATE TABLE PaymentGateway (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
-
 CREATE TABLE Donations (
     donation_id INT AUTO_INCREMENT PRIMARY KEY,
     donor_id VARCHAR(20),
@@ -121,13 +118,13 @@ CREATE TABLE Donations (
     FOREIGN KEY (donor_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (ngo_id) REFERENCES Users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
+drop table drives;
 CREATE TABLE Drives (
     drive_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each drive
     ngo_id VARCHAR(50) NOT NULL,                  -- Foreign key for the NGO that posts the drive
     drive_name VARCHAR(255) NOT NULL,             -- Name of the drive (e.g., "Food Drive", "Clothing Drive")
     description TEXT,                             -- Description of the drive
-    drive_type ENUM('food', 'clothes', 'other') NOT NULL,  -- Type of drive (e.g., food, clothes, other)
+    drive_type ENUM('Charity marathon', 'Food drive', 'Clothing donation') NOT NULL,  -- Type of drive (e.g., food, clothes, other)
     start_date DATE NOT NULL,                     -- Start date of the drive
     end_date DATE NOT NULL,                       -- End date of the drive
     status ENUM('ongoing', 'completed', 'cancelled') DEFAULT 'ongoing', -- Status of the drive
