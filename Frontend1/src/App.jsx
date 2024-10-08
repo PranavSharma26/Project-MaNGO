@@ -36,6 +36,7 @@ function App() {
     return () => {
       socket.off("resource_posted");
       socket.off("Notification_generated");
+      socket.off("booked_resource");
       console.log("Disconnecting socket...");
       socket.disconnect();
     };

@@ -43,6 +43,13 @@ const FoodResources = () => {
 
             // Remove the booked resource from the list
             setResources(prevResources => prevResources.filter(resource => resource.resource_id !== resourceId));
+
+             // Emit notification to server using socket.io
+             socket.emit("booked_resource", {
+                resourceId: resourceId,
+                ngoName : fullName,
+                user_id: user_id, // user_id of the person who posted the resource
+            });
         } catch (error) {
             console.error('Error booking resource:', error);
             setError(error);
