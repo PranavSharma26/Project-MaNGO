@@ -27,9 +27,12 @@ function ContributorDashboard() {
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [drives, setDrives] = useState([]); // Initialize drives state variable
+  const [showDrives, setShowDrives] = useState(false);
+  const [ongoingDrives, setOngoingDrives] = useState([]);
+  const [upcomingDrives, setUpcomingDrives] = useState([]);
   const [hoveringDrives, setHoveringDrives] = useState(false);
   const [hoveringUpcomingDrives, setHoveringUpcomingDrives] = useState(false);
-
+  const [popupOpen, setPopupOpen] = useState(false); // State for popup
   const navigate = useNavigate();
   const [resourceData, setResourceData] = useState({
     resource_name: "",
@@ -44,6 +47,8 @@ function ContributorDashboard() {
     otherUnit: "",
     user_id: null,
   });
+
+  // Categorize drives into ongoing and upcoming
   const [serviceData, setServiceData] = useState({
     service_type: "",
     timestamp: "",
@@ -89,7 +94,7 @@ function ContributorDashboard() {
     },
   ];
 
-  const upcomingDrivesImages = [
+   const upcomingDrivesImages = [
     {
       img: "Charity_Marathon.png",
       desc: "Charity marathon on November 15th.",
@@ -99,27 +104,44 @@ function ContributorDashboard() {
       desc: "Clothing donation drive starting in December.",
     },
   ];
-  useEffect(() => {
-    const fetchDrives = async () => {
-      try {
-        const response = await axios.get("http://localhost:4000/api/drives"); // Use absolute URL
-        console.log("Drives response:", response.data); // Log the response data
-        if (Array.isArray(response.data)) {
-          setDrives(response.data);
-        } else {
-          console.warn("Expected an array but got:", response.data);
-        }
-      } catch (error) {
-        console.error(
-          "Error fetching drives:",
-          error.response ? error.response.data : error.message
-        );
+  const removeDuplicates = (drives) => {
+    const uniqueDrives = [];
+    const driveMap = new Map();
+  
+    drives.forEach((drive) => {
+      if (!driveMap.has(drive.drive_id)) {
+        driveMap.set(drive.drive_id, true);
+        uniqueDrives.push(drive);
       }
-    };
-
-    fetchDrives();
-  }, []);
-
+    });
+  
+    return uniqueDrives;
+  };
+  
+  useEffect(() => {
+    if (showDrives) {
+      axios
+        .get("http://localhost:4000/api/drives")
+        .then((response) => {
+          let drivesData = response.data;
+  
+          console.log("Fetched drives data:", drivesData);
+  
+          if (Array.isArray(drivesData)) {
+            drivesData = removeDuplicates(drivesData);  // Remove duplicates
+            const ongoing = drivesData.filter((drive) => drive.drive_status === "ongoing");
+            const upcoming = drivesData.filter((drive) => drive.drive_status === "upcoming");
+            setOngoingDrives(ongoing);
+            setUpcomingDrives(upcoming);
+          } else {
+            console.error("drivesData is not an array:", drivesData);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching drives:", error);
+        });
+    }
+  }, [showDrives]);
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
@@ -836,76 +858,58 @@ function ContributorDashboard() {
         </div>
       </div>
       {/* Additional Dynamic Content for Drives */}
-      <div className="mt-12 w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-4 text-black">
-          Ongoing and Upcoming Drives
-        </h2>
-        <p className="text-base mb-4 text-blue-800">
-          Explore the drives you can participate in and contribute to, from food
-          drives to charity marathons.
-        </p>
+      {/* Ongoing Drives Section */}
+      <div className="flex flex-col md:flex-row justify-between gap-6">
+  <button
+    className="bg-green-500 text-white px-4 py-2 rounded-md mb-6"
+    onClick={() => setShowDrives(true)}
+  >
+    See Event
+  </button>
 
-        <div className="flex flex-col md:flex-row justify-between gap-6">
-          {/* Ongoing Drives */}
-          <div
-            className="bg-gray-200 p-4 rounded-lg shadow-md relative"
-            onMouseEnter={() => setHoveringDrives(true)}
-            onMouseLeave={() => setHoveringDrives(false)}
-          >
-            <h3 className="text-xl font-semibold mb-2 text-green-500">
-              Ongoing Drives
-            </h3>
-            <p className="text-sm">
-              Contribute to ongoing drives and make an immediate impact.
-            </p>
-            {hoveringDrives && (
-              <div className="absolute top-0 left-full w-64 p-4 pb-6 bg-white rounded-lg shadow-lg z-10">
-                <Slider {...sliderSettings}>
-                  {ongoingDrivesImages.map((drive, index) => (
-                    <div key={index} className="p-4">
-                      <img
-                        src={drive.img}
-                        alt={`Drive ${index}`}
-                        className="w-full h-32 object-cover mb-2 rounded-md"
-                      />
-                      <p className="text-sm text-gray-700">{drive.desc}</p>
-                    </div>
-                  ))}
-                </Slider>
+  {showDrives && (
+    <>
+      {/* Ongoing Drives Section */}
+      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-2 text-green-500">Ongoing Drives</h3>
+        {ongoingDrives.length > 0 ? (
+          <Slider {...sliderSettings}>
+            {ongoingDrives.map((drive) => (
+              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
+                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
+                <p className="text-sm text-gray-700">{drive.description}</p>
+                <p className="text-sm">Start: {drive.start_date}</p>
+                <p className="text-sm">End: {drive.end_date}</p>
               </div>
-            )}
-          </div>
-          {/* Upcoming Drives */}
-          <div
-            className="bg-gray-200 p-4 rounded-lg shadow-md relative"
-            onMouseEnter={() => setHoveringUpcomingDrives(true)}
-            onMouseLeave={() => setHoveringUpcomingDrives(false)}
-          >
-            <h3 className="text-xl font-semibold mb-2 text-green-500">
-              Upcoming Drives
-            </h3>
-            <p className="text-sm">
-              Stay informed about upcoming drives and prepare to contribute.
-            </p>
-            {hoveringUpcomingDrives && (
-              <div className="absolute top-0 left-full w-64 p-4 pb-6 bg-white rounded-lg shadow-lg z-10">
-                <Slider {...sliderSettings}>
-                  {upcomingDrivesImages.map((drive, index) => (
-                    <div key={index} className="p-4">
-                      <img
-                        src={drive.img}
-                        alt={`Drive ${index}`}
-                        className="w-full h-32 object-cover mb-2 rounded-md"
-                      />
-                      <p className="text-sm text-gray-700">{drive.desc}</p>
-                    </div>
-                  ))}
-                </Slider>
-              </div>
-            )}
-          </div>
-        </div>
+            ))}
+          </Slider>
+        ) : (
+          <p>No ongoing drives available at the moment.</p>
+        )}
       </div>
+
+      {/* Upcoming Drives Section */}
+      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-2 text-green-500">In Future Drives</h3>
+        {upcomingDrives.length > 0 ? (
+          <Slider {...sliderSettings}>
+            {upcomingDrives.map((drive) => (
+              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
+                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
+                <p className="text-sm text-gray-700">{drive.description}</p>
+                <p className="text-sm">Start: {drive.start_date}</p>
+                <p className="text-sm">End: {drive.end_date}</p>
+              </div>
+            ))}
+          </Slider>
+        ) : (
+          <p>No upcoming drives available.</p>
+        )}
+      </div>
+    </>
+  )}
+</div>
+
       {/* Review Button */}
       <div className="flex justify-between items-center mt-6">
         <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-lg mr-6">
