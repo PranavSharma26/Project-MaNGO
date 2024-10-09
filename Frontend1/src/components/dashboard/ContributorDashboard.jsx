@@ -246,14 +246,15 @@ function ContributorDashboard() {
       );
       const donor_id = donorResponse.data[0].user_id; // Assuming donor ID is in the first object
 
-      const response = await axios.post("http://localhost:4000/api/donate", {
-        donor_id,
-        ngo_id,
-        donation_amount,
-      });
+      // Store donation details in localStorage or state to use after payment
+      localStorage.setItem(
+      "donationDetails",
+      JSON.stringify({ donor_id, ngo_id, donation_amount })
+    );
 
-      console.log("Donation successful:", response.data);
-      setShowAmountForm(false);
+    // Redirect to the payment gateway
+    navigate('/payment-gateway');
+    
     } catch (err) {
       console.error(
         "Error submitting donation:",
@@ -756,7 +757,7 @@ function ContributorDashboard() {
             </button>
             <button
               type="button"
-              onClick={() => setShowAmountForm(false)}
+              onClick={() => navigate('/payment-gateway')}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;

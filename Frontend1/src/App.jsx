@@ -14,6 +14,7 @@ import LoginAsContributor from './components/login/LoginAsContributor';
 import LoginAsNGO from './components/login/LoginAsNGO';
 import NGODashboard from './components/dashboard/NGODashboard';
 import ContributorDashboard from './components/dashboard/ContributorDashboard';
+import DummyPaymentGateway from './components/dashboard/DummyPaymentGateway';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import Logout from './components/Logout';
@@ -60,6 +61,7 @@ function App() {
             <Route path="/login/ngo" element={<LoginAsNGO />} />
             <Route path="/dashboard/ngo" element={<ProtectedRoute component={NGODashboard} />} />
             <Route path="/dashboard/contributor" element={<ProtectedRoute component={ContributorDashboard} />} />
+            <Route path="/payment-gateway" element={<DummyPaymentGateway />} />
             <Route path="/review-ngo" element={<ReviewNGO />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/profile" element={<Profile />} />
