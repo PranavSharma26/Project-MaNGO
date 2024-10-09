@@ -733,8 +733,21 @@ app.post('/api/post-drive', verifyToken, (req, res) => {
 });
 
 app.get('/api/drives', (req, res) => {
-  const query = 'SELECT * FROM Drives WHERE status = "ongoing"';
-  connection.query(query, (err, results) => {
+  const currentDate = new Date().toISOString().slice(0, 10); // Get the current date in 'YYYY-MM-DD' format
+
+  const query = `
+    SELECT *, 
+      CASE 
+        WHEN start_date <= ? AND end_date >= ? THEN 'ongoing' 
+        WHEN start_date > ? THEN 'upcoming' 
+        ELSE 'completed' 
+      END AS drive_status
+    FROM Drives
+    WHERE (end_date >= ? AND start_date <= ?) OR (start_date > ?)
+    ORDER BY start_date ASC
+  `;
+
+  connection.query(query, [currentDate, currentDate, currentDate, currentDate, currentDate, currentDate], (err, results) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -743,8 +756,6 @@ app.get('/api/drives', (req, res) => {
     res.status(200).json(results);
   });
 });
-
-
 
 // Start the server with Socket.IO
 server.listen(port, () => {
