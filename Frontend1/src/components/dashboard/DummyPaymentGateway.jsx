@@ -21,7 +21,7 @@ const DummyPaymentGateway = () => {
   
     const receiptContent = () => {
     // You can customize this with real transaction data
-    return `Receipt\n\nDonor ID: ${donor_id}\nNGO ID: ${ngo_id}\nDonation Amount: Rs.${donation_amount}\nDate: ${new Date().toLocaleDateString()}\n\nThank you for your donation!`;
+    return `Transaction Receipt\n\nDonor ID: ${donor_id}\nNGO ID: ${ngo_id}\nDonation Amount: Rs.${donation_amount}\nDate: ${new Date().toLocaleDateString()}\n\nThank you for your donation!`;
     };
 
   const downloadReceipt = () => {
