@@ -15,11 +15,14 @@ const DummyPaymentGateway = () => {
     return () => clearTimeout(timer);
   }, []);
 
+    // Retrieve donation details from localStorage
+    const donationDetails = JSON.parse(localStorage.getItem('donationDetails'));
+    const { donor_id, ngo_id, donation_amount } = donationDetails;
   
-  const receiptContent = () => {
+    const receiptContent = () => {
     // You can customize this with real transaction data
-    return `Receipt\n\nDonor ID: 12345\nNGO ID: 67890\nDonation Amount: $100\nDate: ${new Date().toLocaleDateString()}\n\nThank you for your donation!`;
-  };
+    return `Receipt\n\nDonor ID: ${donor_id}\nNGO ID: ${ngo_id}\nDonation Amount: Rs.${donation_amount}\nDate: ${new Date().toLocaleDateString()}\n\nThank you for your donation!`;
+    };
 
   const downloadReceipt = () => {
     const content = receiptContent();
@@ -52,11 +55,7 @@ const DummyPaymentGateway = () => {
 
       setDownloadAvailable(true); // Show download button after the transaction
 
-      // Retrieve donation details from localStorage
-      const donationDetails = JSON.parse(localStorage.getItem('donationDetails'));
       if (donationDetails) {
-        const { donor_id, ngo_id, donation_amount } = donationDetails;
-
         try {
           // Finalize donation by submitting to the backend
           const response = await axios.post('http://localhost:4000/api/donate', {
@@ -67,7 +66,7 @@ const DummyPaymentGateway = () => {
 
           console.log('Donation successful:', response.data);
           alert('Transaction Successful');
-          setTimeout(() => navigate('/dashboard/contributor'), 2000); // Redirect after 2 seconds
+          setTimeout(() => navigate('/dashboard/contributor'), 10000); // Redirect after 10 seconds
         } catch (err) {
           console.error(
             'Error submitting donation after payment:',
