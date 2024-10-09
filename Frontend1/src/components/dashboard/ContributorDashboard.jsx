@@ -515,7 +515,7 @@ function ContributorDashboard() {
                 className="block text-sm font-medium mb-2"
                 htmlFor="description"
               >
-                Description
+                Description (optional)
               </label>
               <input
                 type="text"
