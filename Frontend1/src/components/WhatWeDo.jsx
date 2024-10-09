@@ -5,7 +5,7 @@ function WhatWeDo() {
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleButtonClick = () => {
-    navigate('/register'); // Redirect to the register page
+    navigate('/dashboard/contributor'); // Redirect to the register page
   };
 
   return (
