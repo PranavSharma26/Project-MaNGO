@@ -31,32 +31,36 @@ function NGODashboard() {
     setToken(storedToken); // Set the token in state
   }, []);
 
- // Function to handle booking the service
- const handleBookService = async (service_id) => {
-  const confirmBooking = window.confirm("Are you sure you want to book this service?");
-  if (!confirmBooking) return; // Exit if user cancels
-  try {
-    const response = await fetch(`http://localhost:4000/api/book-service/${service_id}`, {
-      method: 'POST', // Changed from POST to PATCH
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to book the service');
+  // Function to handle booking the service
+  const handleBookService = async (service_id) => {
+    const confirmBooking = window.confirm("Are you sure you want to book this service?");
+    if (!confirmBooking) return; // Exit if user cancels
+  
+    try {
+      const response = await fetch(`http://localhost:4000/api/book-service/${service_id}`, {
+        method: 'POST', // Change this back to POST
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json(); // Get the error response
+        console.error('Error response:', errorData);
+        throw new Error('Failed to book the service');
+      }
+  
+      const result = await response.json();
+  
+      // Remove the booked service from the services list
+      setServices((prevServices) => prevServices.filter(service => service.service_id !== service_id));
+      alert('Service booked successfully!');
+    } catch (error) {
+      console.error('Error booking service:', error.message);
     }
-
-    const result = await response.json();
-
-    // Remove the booked service from the list
-    setSearchResults((prevResults) => prevResults.filter(service => service.service_id !== service_id));
-    alert('Service booked successfully!');
-  } catch (error) {
-    console.error('Error booking service:', error.message);
-  }
-};
+  };
+  
   // Function to handle booking the resource
   const handleBookResource = async (resource_id) => {
     const confirmBooking = window.confirm("Are you sure you want to book this resource?");
@@ -74,8 +78,8 @@ function NGODashboard() {
       if (!response.ok) {
         throw new Error('Failed to book the resource');
       }
-      
-    
+
+
       // Remove the booked resource from the list
       setSearchResults((prevResults) => prevResults.filter(resource => resource.resource_id !== resource_id));
       alert('Resource booked successfully!');
@@ -136,7 +140,7 @@ function NGODashboard() {
           <button className="w-full py-3 bg-pink-500 text-white rounded-full hover:bg-blue-500 transition duration-300" onClick={handleSearch}>
             Search
           </button>
-  
+
           {/* Search Results */}
           <div className="mt-6">
             {searchResults.length > 0 ? (
@@ -163,7 +167,7 @@ function NGODashboard() {
             )}
           </div>
         </div>
-  
+
         {/* Right Section: Categories */}
         <div className="flex-1 p-6 bg-white rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold text-pink-600 mb-4">Categories</h2>
@@ -182,32 +186,31 @@ function NGODashboard() {
               </div>
             ))}
           </div>
-  
-          {/* Posted Services */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-blue-500 mb-4">Posted Services</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {services.length === 0 ? (
-              <p>No services posted yet.</p>
-            ) : (
-              services.map((service) => (
-                <div key={service.service_id} className="bg-blue-100 p-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out">
-                  <h3 className="text-lg font-semibold text-gray-800">Service Type: {service.service_type}</h3>
-                  <p className="text-gray-600 mb-2">Description: {service.description}</p>
-                  <p className="text-gray-500">Status: {service.status}</p>
-                  <p className="text-gray-500">Posted by: {service.user_id}</p>
-                  <p className="text-gray-500">Name: {service.user_name}</p>
-                  <p className="text-gray-500">Timestamp: {service.timestamp}</p>
 
-                  {service.status === 'available' && (
+          {/* Posted Services */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-blue-500 mb-4">Posted Services</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {services.filter(service => service.status === 'available').length === 0 ? (
+                <p>No available services posted yet.</p>
+              ) : (
+                services.filter(service => service.status === 'available').map((service) => (
+                  <div key={service.service_id} className="bg-blue-100 p-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out">
+                    <h3 className="text-lg font-semibold text-gray-800">Service Name: {service.service_name}</h3>
+                    <h5 className="text-lg text-gray-800">Service Type: {service.service_type}</h5>
+                    <p className="text-gray-600 mb-2">Description: {service.description}</p>
+                    <p className="text-gray-500">Status: {service.status}</p>
+                    <p className="text-gray-500">Posted by: {service.user_id}</p>
+                    <p className="text-gray-500">Name: {service.user_name}</p>
+                    <p className="text-gray-500">Timestamp: {service.timestamp}</p>
+
                     <button
                       onClick={() => handleBookService(service.service_id)}
                       className="mt-4 py-2 px-4 bg-pink-600 text-white rounded-full hover:bg-blue-500 transition duration-300"
                     >
                       Book
                     </button>
-                  )}
-                </div>
+                  </div>
                 ))
               )}
             </div>
@@ -215,7 +218,7 @@ function NGODashboard() {
         </div>
       </div>
     </div>
-  );  
+  );
 }
 
 export default NGODashboard;
