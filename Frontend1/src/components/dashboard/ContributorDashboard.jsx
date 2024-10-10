@@ -50,9 +50,10 @@ function ContributorDashboard() {
 
   // Categorize drives into ongoing and upcoming
   const [serviceData, setServiceData] = useState({
-    service_type: "",
-    timestamp: "",
-    description: "",
+    service_name: '',      // Initialize with an empty string
+    service_type: '',      // Initialize with an empty string
+    timestamp: '',         // Initialize with an empty string
+    description: '',       // Initialize with an empty string
   });
   const successStoryImages = [
     {
@@ -94,7 +95,7 @@ function ContributorDashboard() {
     },
   ];
 
-   const upcomingDrivesImages = [
+  const upcomingDrivesImages = [
     {
       img: "Charity_Marathon.png",
       desc: "Charity marathon on November 15th.",
@@ -107,26 +108,26 @@ function ContributorDashboard() {
   const removeDuplicates = (drives) => {
     const uniqueDrives = [];
     const driveMap = new Map();
-  
+
     drives.forEach((drive) => {
       if (!driveMap.has(drive.drive_id)) {
         driveMap.set(drive.drive_id, true);
         uniqueDrives.push(drive);
       }
     });
-  
+
     return uniqueDrives;
   };
-  
+
   useEffect(() => {
     if (showDrives) {
       axios
         .get("http://localhost:4000/api/drives")
         .then((response) => {
           let drivesData = response.data;
-  
+
           console.log("Fetched drives data:", drivesData);
-  
+
           if (Array.isArray(drivesData)) {
             drivesData = removeDuplicates(drivesData);  // Remove duplicates
             const ongoing = drivesData.filter((drive) => drive.drive_status === "ongoing");
@@ -270,13 +271,13 @@ function ContributorDashboard() {
 
       // Store donation details in localStorage or state to use after payment
       localStorage.setItem(
-      "donationDetails",
-      JSON.stringify({ donor_id, ngo_id, donation_amount })
-    );
+        "donationDetails",
+        JSON.stringify({ donor_id, ngo_id, donation_amount })
+      );
 
-    // Redirect to the payment gateway
-    navigate('/payment-gateway');
-    
+      // Redirect to the payment gateway
+      navigate('/payment-gateway');
+
     } catch (err) {
       console.error(
         "Error submitting donation:",
@@ -301,34 +302,34 @@ function ContributorDashboard() {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
-      // Step 1: Fetch user details (first name, last name) using the user_id
-      const userResponse = await axios.get(
-        `http://localhost:4000/api/users/${user_id}`
-      );
-      const { first_name, last_name } = userResponse.data;
-      const fullName = `${first_name} ${last_name}`;
+        // Step 1: Fetch user details (first name, last name) using the user_id
+        const userResponse = await axios.get(`http://localhost:4000/api/users/${user_id}`);
+        const { first_name, last_name } = userResponse.data;
+        const fullName = `${first_name} ${last_name}`;
 
-      const response = await axios.post("http://localhost:4000/api/service", {
-        user_id: user_id,
-        service_type: serviceData.service_type,
-        timestamp: serviceData.timestamp,
-        description: serviceData.description,
-      });
-      setShowServiceForm(false);
-      console.log("Success:", response.data);
-      console.log(fullName);
-      // Step 3: Emit notification to the server with the full name, type, and user_id
-      socket.emit("new_resource", {
-        senderName: fullName,
-        type: 2, // Type of resource (can be dynamic based on your requirement)
-        user_id: user_id, // Also send the user_id along with the name and type
-      });
+        const response = await axios.post("http://localhost:4000/api/service", {
+            user_id: user_id,
+            service_name: serviceData.service_name, // Add service_name here
+            service_type: serviceData.service_type,
+            timestamp: serviceData.timestamp,
+            description: serviceData.description,
+        });
+        setShowServiceForm(false);
+        console.log("Success:", response.data);
+        console.log(fullName);
+        // Step 3: Emit notification to the server with the full name, type, and user_id
+        socket.emit("new_resource", {
+            senderName: fullName,
+            type: 2, // Type of resource (can be dynamic based on your requirement)
+            user_id: user_id, // Also send the user_id along with the name and type
+        });
 
-      console.log("Success:", response.data);
+        console.log("Success:", response.data);
     } catch (err) {
-      console.error("Error:", err.response ? err.response.data : err.message);
+        console.error("Error:", err.response ? err.response.data : err.message);
     }
-  };
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-8 relative">
@@ -586,7 +587,7 @@ function ContributorDashboard() {
       )}
 
       {showServiceForm && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex      justify-center items-center z-50">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
           <form
             onSubmit={handleServiceSubmit}
             className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative"
@@ -596,12 +597,34 @@ function ContributorDashboard() {
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-2"
+                htmlFor="service_name"
+              >
+                Service Name
+              </label>
+              <input
+                type="text"
+                id="service_name"
+                name="service_name"
+                value={serviceData.service_name}
+                onChange={(e) =>
+                  setServiceData({
+                    ...serviceData,
+                    service_name: e.target.value,
+                  })
+                }
+                className="w-full p-2 border border-gray-300 rounded-md"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                className="block text-sm font-medium mb-2"
                 htmlFor="service_type"
               >
                 Service Type
               </label>
-              <input
-                type="text"
+              <select
                 id="service_type"
                 name="service_type"
                 value={serviceData.service_type}
@@ -613,7 +636,12 @@ function ContributorDashboard() {
                 }
                 className="w-full p-2 border border-gray-300 rounded-md"
                 required
-              />
+              >
+                <option value="" disabled>Select a service type</option>
+                <option value="education">Education</option>
+                <option value="health">Health</option>
+                <option value="sustainability">Sustainability</option>
+              </select>
             </div>
 
             <div className="mb-4">
@@ -675,6 +703,8 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
+
+
 
       {showAmountForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
@@ -861,55 +891,55 @@ function ContributorDashboard() {
       {/* Additional Dynamic Content for Drives */}
       {/* Ongoing Drives Section */}
       <div className="flex flex-col md:flex-row justify-between gap-6">
-  <button
-    className="bg-green-500 text-white px-4 py-2 rounded-md mb-6"
-    onClick={() => setShowDrives(true)}
-  >
-    See Event
-  </button>
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded-md mb-6"
+          onClick={() => setShowDrives(true)}
+        >
+          See Event
+        </button>
 
-  {showDrives && (
-    <>
-      {/* Ongoing Drives Section */}
-      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold mb-2 text-green-500">Ongoing Drives</h3>
-        {ongoingDrives.length > 0 ? (
-          <Slider {...sliderSettings}>
-            {ongoingDrives.map((drive) => (
-              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
-                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
-                <p className="text-sm text-gray-700">{drive.description}</p>
-                <p className="text-sm">Start: {drive.start_date}</p>
-                <p className="text-sm">End: {drive.end_date}</p>
-              </div>
-            ))}
-          </Slider>
-        ) : (
-          <p>No ongoing drives available at the moment.</p>
+        {showDrives && (
+          <>
+            {/* Ongoing Drives Section */}
+            <div className="bg-gray-200 p-4 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-2 text-green-500">Ongoing Drives</h3>
+              {ongoingDrives.length > 0 ? (
+                <Slider {...sliderSettings}>
+                  {ongoingDrives.map((drive) => (
+                    <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
+                      <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
+                      <p className="text-sm text-gray-700">{drive.description}</p>
+                      <p className="text-sm">Start: {drive.start_date}</p>
+                      <p className="text-sm">End: {drive.end_date}</p>
+                    </div>
+                  ))}
+                </Slider>
+              ) : (
+                <p>No ongoing drives available at the moment.</p>
+              )}
+            </div>
+
+            {/* Upcoming Drives Section */}
+            <div className="bg-gray-200 p-4 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-2 text-green-500">In Future Drives</h3>
+              {upcomingDrives.length > 0 ? (
+                <Slider {...sliderSettings}>
+                  {upcomingDrives.map((drive) => (
+                    <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
+                      <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
+                      <p className="text-sm text-gray-700">{drive.description}</p>
+                      <p className="text-sm">Start: {drive.start_date}</p>
+                      <p className="text-sm">End: {drive.end_date}</p>
+                    </div>
+                  ))}
+                </Slider>
+              ) : (
+                <p>No upcoming drives available.</p>
+              )}
+            </div>
+          </>
         )}
       </div>
-
-      {/* Upcoming Drives Section */}
-      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold mb-2 text-green-500">In Future Drives</h3>
-        {upcomingDrives.length > 0 ? (
-          <Slider {...sliderSettings}>
-            {upcomingDrives.map((drive) => (
-              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
-                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
-                <p className="text-sm text-gray-700">{drive.description}</p>
-                <p className="text-sm">Start: {drive.start_date}</p>
-                <p className="text-sm">End: {drive.end_date}</p>
-              </div>
-            ))}
-          </Slider>
-        ) : (
-          <p>No upcoming drives available.</p>
-        )}
-      </div>
-    </>
-  )}
-</div>
 
       {/* Review Button */}
       <div className="flex justify-between items-center mt-6">

@@ -422,30 +422,33 @@ app.post("/api/resource", (req, res) => {
 
 // API route to handle "Give Service" form submissions
 app.post("/api/service", (req, res) => {
-  // const userId = req.userId;
-  const { user_id, timestamp, service_type, description } = req.body
+  const { user_id, timestamp, service_type, description, service_name } = req.body;
+
+  console.log("Received data:", req.body); // Log incoming data
 
   const sql = `
-      INSERT INTO service
-      (user_id, timestamp, service_type, description)
-      VALUES (?, ?, ?, ?)
-    `
+    INSERT INTO service
+    (user_id, timestamp, service_type, description, service_name)
+    VALUES (?, ?, ?, ?, ?)
+  `;
 
-  const values = [user_id, timestamp, service_type, description]
+  const values = [user_id, timestamp, service_type, description, service_name];
 
   connection.query(sql, values, (err, result) => {
     if (err) {
-      console.error("Error inserting service:", err)
+      console.error("Error inserting service:", err); // Log error
       return res
         .status(500)
-        .send({ message: "Error inserting service", error: err })
+        .send({ message: "Error inserting service", error: err });
     }
     res.status(201).send({
       message: "Service added successfully",
       service_id: result.insertId,
-    })
-  })
-})
+    });
+  });
+});
+
+
 app.get("/api/profile", verifyToken, (req, res) => {
   const userId = req.userId
   const query =
