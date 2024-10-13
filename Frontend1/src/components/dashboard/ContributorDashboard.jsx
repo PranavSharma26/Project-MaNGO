@@ -852,31 +852,34 @@ function ContributorDashboard() {
         </button>
 
         {showDrives && (
-          <>
-            <div className="bg-white p-4 rounded-lg shadow-md mb-6 transition-all duration-300 ease-in-out transform hover:scale-105">
+          <div className="flex flex-row justify-between gap-6">
+            <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-1/2">
               <h3 className="text-2xl font-semibold mb-4 text-green-500">
                 Ongoing Drives
               </h3>
               {ongoingDrives.length > 0 ? (
-                // Temporarily remove the Slider to see if the data renders correctly
-                ongoingDrives.map((drive) => (
-                  <div
-                    key={drive.drive_id}
-                    className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100"
-                  >
-                    <h4 className="text-lg font-semibold mb-2">
-                      {drive.drive_name}
-                    </h4>
-                    <p className="text-sm mb-1">
-                      <span className="font-semibold">Start:</span>{" "}
-                      {drive.start_date}
-                    </p>
-                    <p className="text-sm">
-                      <span className="font-semibold">End:</span>{" "}
-                      {drive.end_date}
-                    </p>
-                  </div>
-                ))
+                <div className="overflow-y-auto max-h-[400px]">
+                  {" "}
+                  {/* Vertical scroll enabled */}
+                  {ongoingDrives.map((drive) => (
+                    <div
+                      key={drive.drive_id}
+                      className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100 mb-4"
+                    >
+                      <h4 className="text-lg font-semibold mb-2">
+                        {drive.drive_name}
+                      </h4>
+                      <p className="text-sm mb-1">
+                        <span className="font-semibold">Start:</span>{" "}
+                        {drive.start_date}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">End:</span>{" "}
+                        {drive.end_date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p className="text-gray-500">
                   No ongoing drives available at the moment.
@@ -885,37 +888,40 @@ function ContributorDashboard() {
             </div>
 
             {/* Upcoming Drives Section */}
-            <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+            <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-1/2">
               <h3 className="text-2xl font-semibold mb-4 text-green-500">
                 Upcoming Drives
               </h3>
               {upcomingDrives.length > 0 ? (
-                // Temporarily remove the Slider to see if the data renders correctly
-                upcomingDrives.map((drive) => (
-                  <div
-                    key={drive.drive_id}
-                    className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100"
-                  >
-                    <h4 className="text-lg font-semibold mb-2">
-                      {drive.drive_name}
-                    </h4>
-                    <p className="text-sm mb-1">
-                      <span className="font-semibold">Start:</span>{" "}
-                      {drive.start_date}
-                    </p>
-                    <p className="text-sm">
-                      <span className="font-semibold">End:</span>{" "}
-                      {drive.end_date}
-                    </p>
-                  </div>
-                ))
+                <div className="overflow-y-auto max-h-[400px]">
+                  {" "}
+                  {/* Vertical scroll enabled */}
+                  {upcomingDrives.map((drive) => (
+                    <div
+                      key={drive.drive_id}
+                      className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100 mb-4"
+                    >
+                      <h4 className="text-lg font-semibold mb-2">
+                        {drive.drive_name}
+                      </h4>
+                      <p className="text-sm mb-1">
+                        <span className="font-semibold">Start:</span>{" "}
+                        {drive.start_date}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">End:</span>{" "}
+                        {drive.end_date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <p className="text-gray-500">
                   No upcoming drives available at the moment.
                 </p>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
 
