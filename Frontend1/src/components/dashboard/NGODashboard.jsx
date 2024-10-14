@@ -8,7 +8,41 @@ function NGODashboard() {
   const handlePostDrive = () => {
     navigate('/post-drive');
   };
-  // Fetch posted services from the backend
+
+
+
+
+
+
+
+  
+
+useEffect(() => {
+  const storedToken = localStorage.getItem('token');
+  setToken(storedToken); // Set the token in state
+}, []);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//   // Fetch posted services from the backend
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -161,9 +195,12 @@ function NGODashboard() {
                 <img src="/MaNGO_Logo.png" alt="MaNGO Logo" className="mx-auto w-35 h-35" />
               </div>
             )}
-          </div>
+          </div> 
         </div>
-  
+        
+
+
+
         {/* Right Section: Categories */}
         <div className="flex-1 p-6 bg-white rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold text-pink-600 mb-4">Categories</h2>
@@ -219,6 +256,7 @@ function NGODashboard() {
 }
 
 export default NGODashboard;
+
 
 
 
