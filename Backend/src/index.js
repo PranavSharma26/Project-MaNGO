@@ -99,11 +99,11 @@ app.use(bodyParser.json())
 
 // MySQL database connection
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST || "b5vhxq1m07agt2r244mf-mysql.services.clever-cloud.com",
+  host: process.env.DB_HOST || "localhost",
   port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "usrwljrcr0gshiuh",
+  user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || "b5vhxq1m07agt2r244mf",
+  database: process.env.DB_NAME || "REGISTER",
 })
 
 connection.connect((err) => {
