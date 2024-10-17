@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext'; 
+import socket from '/src/socket'; // Import the socket instance
 
 function LoginAsContributor() {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -27,7 +28,12 @@ function LoginAsContributor() {
         localStorage.setItem('user_id', user_id);
         
         login(token, userRole); // Pass userRole to login function
-        // navigate('/'); // Redirect to Home instead of Contributor Dashboard
+
+        // Emit the 'register_user' event after successful login
+        socket.emit("register_user", user_id);
+
+        // Navigate to the desired route after login
+        // navigate('/contributor-dashboard'); // Adjust the route if needed
       } else {
         console.error("Login failed: No token or user_id received");
       }

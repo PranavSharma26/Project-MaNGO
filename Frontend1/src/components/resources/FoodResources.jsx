@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
+import axios from 'axios';
+import socket from "/src/socket";
 const FoodResources = () => {
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,11 +26,23 @@ const FoodResources = () => {
         fetchResources();
     }, []);
 
-    const handleBook = async (resourceId) => {
+    const handleBook = async (resourceId, resourceName) => {
         const confirmBooking = window.confirm('Are you sure you want to book this resource?');
         if (!confirmBooking) return;
 
+         // ngo_id (retrieving from localStorage)
+         const ngo_id = localStorage.getItem("ngo_id");
+         console.log("NGO ID:", ngo_id); 
+     
+
         try {
+             // Step 1: Fetch user details (first name, last name) using the user_id
+             const userResponse = await axios.get(
+                `http://localhost:4000/api/users/${ngo_id}`
+            );
+            const { first_name, last_name } = userResponse.data;
+            const fullName = `${first_name} ${last_name}`;
+
             const response = await fetch(`http://localhost:4000/api/resources/book/${resourceId}`, {
                 method: 'PATCH',
                 headers: {
@@ -41,8 +54,24 @@ const FoodResources = () => {
                 throw new Error('Failed to book the resource');
             }
 
+               // Parse the response to get user_id
+               const data = await response.json();
+               const { user_id } = data;
+   
+               console.log(`provider Id : ${user_id}`);
+
             // Remove the booked resource from the list
             setResources(prevResources => prevResources.filter(resource => resource.resource_id !== resourceId));
+
+            // Emit notification to server using socket.io
+            socket.emit("booked_resource", {
+                resourceId: resourceId,
+                resourceName: resourceName, // Sending resource name as well
+                ngoName: fullName,
+                user_id: user_id, // user_id of the person who posted the resource
+            });
+    
+            console.log("Booking and notification sent successfully");
         } catch (error) {
             console.error('Error booking resource:', error);
             setError(error);
@@ -93,8 +122,8 @@ const FoodResources = () => {
                                 
                                 <button 
                                     className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-purple-500 hover:to-blue-500 transition-colors duration-200 mt-2"
-                                    onClick={() => handleBook(resource.resource_id)}
-                                >
+                                    onClick={() => handleBook(resource.resource_id, resource.resource_name)} // Pass resource name along with id
+                                    >
                                     Book
                                 </button>
                             </div>
