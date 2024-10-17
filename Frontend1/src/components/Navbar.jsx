@@ -1,10 +1,10 @@
+
 import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import bellIcon from '../assets/image.png';  // Import the bell icon image
-// import { io } from "socket.io-client";
+import profileIcon from '../assets/icon.png'; // Import your profile icon image
 import socket from "/src/socket";  // Adjust path if needed
-
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useContext(AuthContext);
@@ -60,8 +60,6 @@ const Navbar = () => {
     };
   }, []);
   
-  
-
   // Toggle the dropdown visibility and mark notifications as read
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
@@ -107,39 +105,32 @@ const Navbar = () => {
 
               {/* Notifications dropdown */}
               {showDropdown && (
-  <div className="absolute right-0 mt-2 w-[30rem] bg-white shadow-lg rounded-lg py-2 max-h-64 overflow-y-auto">
-    {notifications.length > 0 ? (
-      notifications.map((notification, index) => (
-        <div key={index} className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200 flex justify-between items-center">
-          <span>{notification}</span>
-          <button
-            className="text-blue-600 hover:text-blue-800 text-sm"
-            onClick={() => showNotificationDetails(notification)} // Handle the click event
-          >
-            Details
-          </button>
-        </div>
-      ))
-    ) : (
-      <div className="px-4 py-2 text-sm text-gray-700">
-        No new notifications
-      </div>
-    )}
-  </div>
-)}
-
-
-
-
-
-
-
+                <div className="absolute right-0 mt-2 w-[30rem] bg-white shadow-lg rounded-lg py-2 max-h-64 overflow-y-auto">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification, index) => (
+                      <div key={index} className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200 flex justify-between items-center">
+                        <span>{notification}</span>
+                        <button
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                          onClick={() => showNotificationDetails(notification)} // Handle the click event
+                        >
+                          Details
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-700">
+                      No new notifications
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {isLoggedIn ? (
               <>
-                <NavLink to="/profile" className="text-gray-700 hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium">
-                  Profile
+                <NavLink to="/profile" className="flex items-center">
+                  <img src={profileIcon} alt="Profile Icon" className="h-6 w-6" />
                 </NavLink>
                 <button
                   onClick={() => {
@@ -156,14 +147,16 @@ const Navbar = () => {
                 <NavLink
                   to="/login"
                   className={({ isActive }) =>
-                    `bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-pink-500' : ''}`}
+                    `bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-pink-500' : ''}`
+                  }
                 >
                   Login
                 </NavLink>
                 <NavLink
                   to="/register"
                   className={({ isActive }) =>
-                    `bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-cyan-400' : ''}`}
+                    `bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-sm font-medium ${isActive ? 'bg-cyan-400' : ''}`
+                  }
                 >
                   Register
                 </NavLink>
@@ -187,7 +180,8 @@ const Navbar = () => {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`}
+                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`
+              }
               onClick={() => setIsOpen(false)}
             >
               Home
@@ -195,7 +189,8 @@ const Navbar = () => {
             <NavLink
               to="/how-it-works"
               className={({ isActive }) =>
-                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`}
+                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`
+              }
               onClick={() => setIsOpen(false)}
             >
               How it Works
@@ -203,7 +198,8 @@ const Navbar = () => {
             <NavLink
               to="/what-we-do"
               className={({ isActive }) =>
-                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`}
+                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`
+              }
               onClick={() => setIsOpen(false)}
             >
               What We Do
@@ -211,7 +207,8 @@ const Navbar = () => {
             <NavLink
               to="/gallery"
               className={({ isActive }) =>
-                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`}
+                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`
+              }
               onClick={() => setIsOpen(false)}
             >
               Gallery
@@ -219,27 +216,23 @@ const Navbar = () => {
             <NavLink
               to="/about-us"
               className={({ isActive }) =>
-                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`}
+                `block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-gray-200' : ''}`
+              }
               onClick={() => setIsOpen(false)}
             >
               About Us
             </NavLink>
-
             {isLoggedIn ? (
               <>
-                <NavLink
-                  to="/profile"
-                  className="block w-full text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Profile
+                <NavLink to="/profile" className="flex items-center">
+                  <img src={profileIcon} alt="Profile Icon" className="h-6 w-6" />
                 </NavLink>
                 <button
                   onClick={() => {
                     logout();
                     setIsOpen(false);
                   }}
-                  className="block w-full bg-red-600 text-white hover:bg-red-500 px-3 py-2 rounded-md text-base font-medium"
+                  className="bg-red-600 text-white hover:bg-red-500 block w-full text-left px-3 py-2 rounded-md text-base font-medium"
                 >
                   Logout
                 </button>
@@ -247,20 +240,18 @@ const Navbar = () => {
             ) : (
               <>
                 <NavLink
-                  to="/register"
-                  className={({ isActive }) =>
-                    `block w-full bg-pink-600 text-white hover:bg-pink-500 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-pink-500' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Register
-                </NavLink>
-                <NavLink
                   to="/login"
-                  className={({ isActive }) =>
-                    `block w-full bg-cyan-500 text-white hover:bg-cyan-400 px-3 py-2 rounded-md text-base font-medium ${isActive ? 'bg-cyan-400' : ''}`}
+                  className="block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium"
                   onClick={() => setIsOpen(false)}
                 >
                   Login
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="block text-black hover:bg-gray-200 hover:text-gray-800 px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
                 </NavLink>
               </>
             )}

@@ -26,13 +26,9 @@ function ContributorDashboard() {
 
   const [selectedNgo, setSelectedNgo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [drives, setDrives] = useState([]); // Initialize drives state variable
   const [showDrives, setShowDrives] = useState(false);
   const [ongoingDrives, setOngoingDrives] = useState([]);
   const [upcomingDrives, setUpcomingDrives] = useState([]);
-  const [hoveringDrives, setHoveringDrives] = useState(false);
-  const [hoveringUpcomingDrives, setHoveringUpcomingDrives] = useState(false);
-  const [popupOpen, setPopupOpen] = useState(false); // State for popup
   const navigate = useNavigate();
   const [resourceData, setResourceData] = useState({
     resource_name: "",
@@ -48,7 +44,6 @@ function ContributorDashboard() {
     user_id: null,
   });
 
-  // Categorize drives into ongoing and upcoming
   const [serviceData, setServiceData] = useState({
     service_type: "",
     timestamp: "",
@@ -83,65 +78,53 @@ function ContributorDashboard() {
       desc: "Clothing donation event on November 5th.",
     },
   ];
-  const ongoingDrivesImages = [
-    {
-      img: "Food_Drive.png",
-      desc: "Food drive helping communities in need.",
-    },
-    {
-      img: "Medical_Donation.png",
-      desc: "Medical supplies distribution in remote villages.",
-    },
-  ];
 
-   const upcomingDrivesImages = [
-    {
-      img: "Charity_Marathon.png",
-      desc: "Charity marathon on November 15th.",
-    },
-    {
-      img: "Clothing_Donation",
-      desc: "Clothing donation drive starting in December.",
-    },
-  ];
   const removeDuplicates = (drives) => {
     const uniqueDrives = [];
     const driveMap = new Map();
-  
+
     drives.forEach((drive) => {
       if (!driveMap.has(drive.drive_id)) {
         driveMap.set(drive.drive_id, true);
         uniqueDrives.push(drive);
       }
     });
-  
+
     return uniqueDrives;
   };
-  
+
   useEffect(() => {
     if (showDrives) {
+      setLoading(true);
       axios
         .get("http://localhost:4000/api/drives")
         .then((response) => {
           let drivesData = response.data;
-  
+
           console.log("Fetched drives data:", drivesData);
-  
+
           if (Array.isArray(drivesData)) {
-            drivesData = removeDuplicates(drivesData);  // Remove duplicates
-            const ongoing = drivesData.filter((drive) => drive.drive_status === "ongoing");
-            const upcoming = drivesData.filter((drive) => drive.drive_status === "upcoming");
+            drivesData = removeDuplicates(drivesData); // Remove duplicates
+            const ongoing = drivesData.filter(
+              (drive) => drive.drive_status === "ongoing"
+            );
+            const upcoming = drivesData.filter(
+              (drive) => drive.drive_status === "upcoming"
+            );
             setOngoingDrives(ongoing);
             setUpcomingDrives(upcoming);
           } else {
             console.error("drivesData is not an array:", drivesData);
           }
+          setLoading(false); // Stop loading once data is fetched
         })
         .catch((error) => {
           console.error("Error fetching drives:", error);
+          setLoading(false); // Stop loading if an error occurs
         });
     }
   }, [showDrives]);
+
   const handleReviewNgo = () => {
     navigate("/review-ngo"); // Navigate to the review NGO page
   };
@@ -270,13 +253,12 @@ function ContributorDashboard() {
 
       // Store donation details in localStorage or state to use after payment
       localStorage.setItem(
-      "donationDetails",
-      JSON.stringify({ donor_id, ngo_id, donation_amount })
-    );
+        "donationDetails",
+        JSON.stringify({ donor_id, ngo_id, donation_amount })
+      );
 
-    // Redirect to the payment gateway
-    navigate('/payment-gateway');
-    
+      // Redirect to the payment gateway
+      navigate("/payment-gateway");
     } catch (err) {
       console.error(
         "Error submitting donation:",
@@ -779,7 +761,7 @@ function ContributorDashboard() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/payment-gateway')}
+              onClick={() => navigate("/payment-gateway")}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
@@ -859,57 +841,89 @@ function ContributorDashboard() {
         </div>
       </div>
       {/* Additional Dynamic Content for Drives */}
-      {/* Ongoing Drives Section */}
-      <div className="flex flex-col md:flex-row justify-between gap-6">
-  <button
-    className="bg-green-500 text-white px-4 py-2 rounded-md mb-6"
-    onClick={() => setShowDrives(true)}
-  >
-    See Event
-  </button>
 
-  {showDrives && (
-    <>
       {/* Ongoing Drives Section */}
-      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold mb-2 text-green-500">Ongoing Drives</h3>
-        {ongoingDrives.length > 0 ? (
-          <Slider {...sliderSettings}>
-            {ongoingDrives.map((drive) => (
-              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
-                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
-                <p className="text-sm text-gray-700">{drive.description}</p>
-                <p className="text-sm">Start: {drive.start_date}</p>
-                <p className="text-sm">End: {drive.end_date}</p>
-              </div>
-            ))}
-          </Slider>
-        ) : (
-          <p>No ongoing drives available at the moment.</p>
+      <div className="flex flex-col justify-between gap-6">
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded-md mb-6 hover:bg-green-600 transition-colors duration-300"
+          onClick={() => setShowDrives(!showDrives)}
+        >
+          {showDrives ? "Hide Events" : "See Events"}
+        </button>
+
+        {showDrives && (
+          <div className="flex flex-row justify-between gap-6">
+            <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-1/2">
+              <h3 className="text-2xl font-semibold mb-4 text-green-500">
+                Ongoing Drives
+              </h3>
+              {ongoingDrives.length > 0 ? (
+                <div className="overflow-y-auto max-h-[400px]">
+                  {" "}
+                  {/* Vertical scroll enabled */}
+                  {ongoingDrives.map((drive) => (
+                    <div
+                      key={drive.drive_id}
+                      className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100 mb-4"
+                    >
+                      <h4 className="text-lg font-semibold mb-2">
+                        {drive.drive_name}
+                      </h4>
+                      <p className="text-sm mb-1">
+                        <span className="font-semibold">Start:</span>{" "}
+                        {drive.start_date}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">End:</span>{" "}
+                        {drive.end_date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  No ongoing drives available at the moment.
+                </p>
+              )}
+            </div>
+
+            {/* Upcoming Drives Section */}
+            <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 w-1/2">
+              <h3 className="text-2xl font-semibold mb-4 text-green-500">
+                Upcoming Drives
+              </h3>
+              {upcomingDrives.length > 0 ? (
+                <div className="overflow-y-auto max-h-[400px]">
+                  {" "}
+                  {/* Vertical scroll enabled */}
+                  {upcomingDrives.map((drive) => (
+                    <div
+                      key={drive.drive_id}
+                      className="p-4 bg-gray-50 rounded-lg shadow-lg hover:bg-gray-100 mb-4"
+                    >
+                      <h4 className="text-lg font-semibold mb-2">
+                        {drive.drive_name}
+                      </h4>
+                      <p className="text-sm mb-1">
+                        <span className="font-semibold">Start:</span>{" "}
+                        {drive.start_date}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">End:</span>{" "}
+                        {drive.end_date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  No upcoming drives available at the moment.
+                </p>
+              )}
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Upcoming Drives Section */}
-      <div className="bg-gray-200 p-4 rounded-lg shadow-md">
-        <h3 className="text-xl font-semibold mb-2 text-green-500">In Future Drives</h3>
-        {upcomingDrives.length > 0 ? (
-          <Slider {...sliderSettings}>
-            {upcomingDrives.map((drive) => (
-              <div key={drive.drive_id} className="p-4"> {/* Use drive.drive_id as the key */}
-                <h4 className="text-lg font-semibold">{drive.drive_name}</h4>
-                <p className="text-sm text-gray-700">{drive.description}</p>
-                <p className="text-sm">Start: {drive.start_date}</p>
-                <p className="text-sm">End: {drive.end_date}</p>
-              </div>
-            ))}
-          </Slider>
-        ) : (
-          <p>No upcoming drives available.</p>
-        )}
-      </div>
-    </>
-  )}
-</div>
 
       {/* Review Button */}
       <div className="flex justify-between items-center mt-6">
