@@ -78,7 +78,6 @@ function ContributorDashboard() {
       desc: "Clothing donation event on November 5th.",
     },
   ];
-
   const removeDuplicates = (drives) => {
     const uniqueDrives = [];
     const driveMap = new Map();
@@ -924,7 +923,6 @@ function ContributorDashboard() {
           </div>
         )}
       </div>
-
       {/* Review Button */}
       <div className="flex justify-between items-center mt-6">
         <div className="flex-1 bg-gray-200 p-6 rounded-lg shadow-lg mr-6">

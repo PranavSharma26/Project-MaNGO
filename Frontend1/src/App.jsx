@@ -26,12 +26,15 @@ import ClothResources from './components/resources/ClothResources';
 import OtherResources from './components/resources/OtherResources';
 import PostDrive from './components/dashboard/PostDrive';  // Import the new PostDrive component
 import socket from "./socket";  // Corrected path, ensure the path is relative to this file
+import HealthServices from './components/services/HealthServices';
+import SustainabilityServices from './components/services/SustainabilityServices';
+import EducationServices from './components/services/EducationServices';
 
 function App() {
   useEffect(() => {
     // Connect the socket once
     console.log("Connecting socket...");
-    socket.connect(); 
+    socket.connect();
 
     // Disconnect the socket when the component unmounts
     return () => {
@@ -69,6 +72,9 @@ function App() {
             <Route path="/resources/clothes" element={<ClothResources />} />
             <Route path="/resources/other" element={<OtherResources />} />
             <Route path="/post-drive" element={<ProtectedRoute component={PostDrive} />} /> {/* Added PostDrive route */}
+            <Route path="/services/education" element={<EducationServices />} />
+            <Route path="/services/health" element={<HealthServices />} />
+            <Route path="/services/sustainability" element={<SustainabilityServices />} />
           </Routes>
         </main>
         <Footer />
