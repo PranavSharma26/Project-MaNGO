@@ -210,6 +210,54 @@ app.post("/api/book-service/:service_id", verifyToken, (req, res) => {
   });
 });
 
+app.get('/api/service/education', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'education' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+app.get('/api/service/health', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'health' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+app.get('/api/service/sustainability', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'sustainability' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
 // Endpoint to get user details by user_id
 app.get("/api/users/:user_id", (req, res) => {
   const userId = req.params.user_id
