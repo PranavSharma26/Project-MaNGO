@@ -140,73 +140,119 @@ app.get("/api/service", (req, res) => {
     CONCAT(u.first_name, ' ', IFNULL(u.middle_name, ''), ' ', u.last_name) AS user_name, -- Concatenate names
     s.timestamp, 
     s.service_type, 
-    s.service_name, -- Add service_name to the selection
     s.description, 
     s.status
 FROM 
     Service s
 JOIN 
-    users u ON s.user_id = u.user_id;`;
+    users u ON s.user_id = u.user_id;
+`
 
   connection.query(sql, (err, result) => {
     if (err) {
-      console.error("Error fetching services:", err);
+      console.error("Error fetching services:", err)
       return res
         .status(500)
-        .json({ message: "Error fetching services", error: err });
+        .json({ message: "Error fetching services", error: err })
     }
     if (result.length === 0) {
-      return res.status(404).json({ message: "No services found" });
+      return res.status(404).json({ message: "No services found" })
     }
 
-    res.status(200).json(result);
-  });
-});
+    res.status(200).json(result)
+  })
+})
 
-
-// Book a Service
 // Book a Service
 app.post("/api/book-service/:service_id", verifyToken, (req, res) => {
-  const serviceId = req.params.service_id;
-  const userId = req.userId;
+  const serviceId = req.params.service_id
+  const userId = req.userId
 
   // Query to check if the service is available
-  const checkServiceQuery = `SELECT * FROM service WHERE service_id = ? AND status = 'available'`;
+  const checkServiceQuery = `SELECT * FROM service WHERE service_id = ? AND status = 'available'`
 
   connection.query(checkServiceQuery, [serviceId], (err, result) => {
     if (err) {
-      console.error("Error checking service availability:", err);
+      console.error("Error checking service availability:", err)
       return res
         .status(500)
-        .json({ message: "Error checking service availability", error: err });
+        .json({ message: "Error checking service availability", error: err })
     }
 
     if (result.length === 0) {
       return res
         .status(404)
-        .json({ message: "Service not available or already booked" });
+        .json({ message: "Service not available or already booked" })
     }
 
     // Update the status of the service to 'unavailable'
-    const updateQuery = `UPDATE service SET status = 'unavailable' WHERE service_id = ?`;
+    const updateQuery = `UPDATE service SET status = 'unavailable' WHERE service_id = ?`
 
     connection.query(updateQuery, [serviceId], (err, result) => {
       if (err) {
-        console.error("Error updating service status:", err);
+        console.error("Error updating service status:", err)
         return res
           .status(500)
-          .json({ message: "Error booking service", error: err });
+          .json({ message: "Error booking service", error: err })
       }
 
       if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Service not found" });
+        return res.status(404).json({ message: "Service not found" })
       }
 
       // Emit notification that the service was booked
-      io.emit("service_booked", { serviceId, userId });
+      io.emit("service_booked", { serviceId, userId })
 
-      res.status(200).json({ message: "Service booked successfully" });
-    });
+      res.status(200).json({ message: "Service booked successfully" })
+    })
+  })
+})
+
+app.get('/api/service/education', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'education' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+app.get('/api/service/health', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'health' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+app.get('/api/service/sustainability', (req, res) => {
+  const query = `
+    SELECT * FROM Service 
+    WHERE service_type = 'sustainability' 
+    AND status = 'available';
+  `;
+
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error fetching education services:', error);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
   });
 });
 
@@ -472,33 +518,30 @@ app.post("/api/resource", (req, res) => {
 
 // API route to handle "Give Service" form submissions
 app.post("/api/service", (req, res) => {
-  const { user_id, timestamp, service_type, description, service_name } = req.body;
-
-  console.log("Received data:", req.body); // Log incoming data
+  // const userId = req.userId;
+  const { user_id, timestamp, service_type, description } = req.body
 
   const sql = `
-    INSERT INTO service
-    (user_id, timestamp, service_type, description, service_name)
-    VALUES (?, ?, ?, ?, ?)
-  `;
+      INSERT INTO service
+      (user_id, timestamp, service_type, description)
+      VALUES (?, ?, ?, ?)
+    `
 
-  const values = [user_id, timestamp, service_type, description, service_name];
+  const values = [user_id, timestamp, service_type, description]
 
   connection.query(sql, values, (err, result) => {
     if (err) {
-      console.error("Error inserting service:", err); // Log error
+      console.error("Error inserting service:", err)
       return res
         .status(500)
-        .send({ message: "Error inserting service", error: err });
+        .send({ message: "Error inserting service", error: err })
     }
     res.status(201).send({
       message: "Service added successfully",
       service_id: result.insertId,
-    });
-  });
-});
-
-
+    })
+  })
+})
 app.get("/api/profile", verifyToken, (req, res) => {
   const userId = req.userId
   const query =

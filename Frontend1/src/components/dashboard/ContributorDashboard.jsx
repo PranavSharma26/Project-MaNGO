@@ -44,12 +44,10 @@ function ContributorDashboard() {
     user_id: null,
   });
 
-  // Categorize drives into ongoing and upcoming
   const [serviceData, setServiceData] = useState({
-    service_name: '',      // Initialize with an empty string
-    service_type: '',      // Initialize with an empty string
-    timestamp: '',         // Initialize with an empty string
-    description: '',       // Initialize with an empty string
+    service_type: "",
+    timestamp: "",
+    description: "",
   });
   const successStoryImages = [
     {
@@ -259,8 +257,7 @@ function ContributorDashboard() {
       );
 
       // Redirect to the payment gateway
-      navigate('/payment-gateway');
-
+      navigate("/payment-gateway");
     } catch (err) {
       console.error(
         "Error submitting donation:",
@@ -285,34 +282,34 @@ function ContributorDashboard() {
     console.log("User ID:", user_id); // Log user_id to check its value
 
     try {
-        // Step 1: Fetch user details (first name, last name) using the user_id
-        const userResponse = await axios.get(`http://localhost:4000/api/users/${user_id}`);
-        const { first_name, last_name } = userResponse.data;
-        const fullName = `${first_name} ${last_name}`;
+      // Step 1: Fetch user details (first name, last name) using the user_id
+      const userResponse = await axios.get(
+        `http://localhost:4000/api/users/${user_id}`
+      );
+      const { first_name, last_name } = userResponse.data;
+      const fullName = `${first_name} ${last_name}`;
 
-        const response = await axios.post("http://localhost:4000/api/service", {
-            user_id: user_id,
-            service_name: serviceData.service_name, // Add service_name here
-            service_type: serviceData.service_type,
-            timestamp: serviceData.timestamp,
-            description: serviceData.description,
-        });
-        setShowServiceForm(false);
-        console.log("Success:", response.data);
-        console.log(fullName);
-        // Step 3: Emit notification to the server with the full name, type, and user_id
-        socket.emit("new_resource", {
-            senderName: fullName,
-            type: 2, // Type of resource (can be dynamic based on your requirement)
-            user_id: user_id, // Also send the user_id along with the name and type
-        });
+      const response = await axios.post("http://localhost:4000/api/service", {
+        user_id: user_id,
+        service_type: serviceData.service_type,
+        timestamp: serviceData.timestamp,
+        description: serviceData.description,
+      });
+      setShowServiceForm(false);
+      console.log("Success:", response.data);
+      console.log(fullName);
+      // Step 3: Emit notification to the server with the full name, type, and user_id
+      socket.emit("new_resource", {
+        senderName: fullName,
+        type: 2, // Type of resource (can be dynamic based on your requirement)
+        user_id: user_id, // Also send the user_id along with the name and type
+      });
 
-        console.log("Success:", response.data);
+      console.log("Success:", response.data);
     } catch (err) {
-        console.error("Error:", err.response ? err.response.data : err.message);
+      console.error("Error:", err.response ? err.response.data : err.message);
     }
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-8 relative">
@@ -570,7 +567,7 @@ function ContributorDashboard() {
       )}
 
       {showServiceForm && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex      justify-center items-center z-50">
           <form
             onSubmit={handleServiceSubmit}
             className="w-full max-w-lg bg-white p-8 rounded-lg shadow-lg relative"
@@ -580,34 +577,12 @@ function ContributorDashboard() {
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-2"
-                htmlFor="service_name"
-              >
-                Service Name
-              </label>
-              <input
-                type="text"
-                id="service_name"
-                name="service_name"
-                value={serviceData.service_name}
-                onChange={(e) =>
-                  setServiceData({
-                    ...serviceData,
-                    service_name: e.target.value,
-                  })
-                }
-                className="w-full p-2 border border-gray-300 rounded-md"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
-                className="block text-sm font-medium mb-2"
                 htmlFor="service_type"
               >
                 Service Type
               </label>
-              <select
+              <input
+                type="text"
                 id="service_type"
                 name="service_type"
                 value={serviceData.service_type}
@@ -619,12 +594,7 @@ function ContributorDashboard() {
                 }
                 className="w-full p-2 border border-gray-300 rounded-md"
                 required
-              >
-                <option value="" disabled>Select a service type</option>
-                <option value="education">Education</option>
-                <option value="health">Health</option>
-                <option value="sustainability">Sustainability</option>
-              </select>
+              />
             </div>
 
             <div className="mb-4">
@@ -686,8 +656,6 @@ function ContributorDashboard() {
           </form>
         </div>
       )}
-
-
 
       {showAmountForm && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-70 flex justify-center items-center z-50">
@@ -792,7 +760,7 @@ function ContributorDashboard() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/payment-gateway')}
+              onClick={() => navigate("/payment-gateway")}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
