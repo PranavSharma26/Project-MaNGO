@@ -34,17 +34,19 @@ function App() {
   useEffect(() => {
     // Connect the socket once
     console.log("Connecting socket...");
-    socket.connect();
+    socket.connect(); 
 
     // Disconnect the socket when the component unmounts
     return () => {
       socket.off("resource_posted");
       socket.off("Notification_generated");
+      socket.off("resource_booked");
       console.log("Disconnecting socket...");
       socket.disconnect();
     };
   }, []);  // Make sure the empty dependency array is there so it runs only once
 
+  
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen">

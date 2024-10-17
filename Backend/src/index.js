@@ -19,79 +19,115 @@ const io = new Server(server, {
     origin: "http://localhost:5173", // Allow CORS for all origins, you can restrict this in production
   },
 })
+let connectedUsers = {};
+
 io.on("connection", (socket) => {
- 
-  console.log("A user has been connected", socket.id);
+    // console.log("A user has been connected", socket.id);
 
-  socket.on("new_resource", async (data) => {
-  const { senderName, type, user_id } = data;
-  
-    // Emit a notification to all clients
-    io.emit("resource_posted", {
-      name: senderName,
-      typeOfContributor: type,
+    // When a user connects, store their socket.id and user_id (if available)
+    socket.on("register_user", (user_id) => {
+        connectedUsers[user_id] = socket.id;
+        console.log(`User ${user_id} connected with socket ID: ${socket.id}`);
     });
 
-    // Create the notification message
-    let notificationMessage = ""; // Use 'let' instead of 'const'
-    if (type === 1) {
-      notificationMessage = ` ${senderName} posted a Resource`;
-    } else if (type === 2) {
-      notificationMessage = `${senderName} posted a Service`;
-    } else {
-      notificationMessage = `${senderName} donated money`;
-    }
+    socket.on("new_resource", async (data) => {
+        const { senderName, type, user_id } = data;
 
-    // Insert the notification into the database
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/api/notification",
-        {
-          user_id,
-          notification_message: notificationMessage,
+        // Emit a notification to all clients
+        io.emit("resource_posted", {
+            name: senderName,
+            typeOfContributor: type,
+        });
+
+        // Create the notification message
+        let notificationMessage = "";
+        if (type === 1) {
+            notificationMessage = `${senderName} posted a Resource`;
+        } else if (type === 2) {
+            notificationMessage = `${senderName} posted a Service`;
+        } else {
+            notificationMessage = `${senderName} donated money`;
         }
-      );
 
-      // // Log the notification ID returned from the server
-      // const { notification_id } = response.data;
-      // // console.log('Notification ID:', notification_id);
-    } catch (err) {
-      console.error(
-        "Error inserting notification:",
-        err.response ? err.response.data : err.message
-      );
-    }
-  });
-
-  // Handling notification for Event Drive
-  socket.on("DriveNotification", async ({ senderName, user_id }) => {
-    // Emit a notification to all clients
-    io.emit("Notification_generated", {
-      name: senderName,
+        // Insert the notification into the database
+        try {
+            await axios.post("http://localhost:4000/api/notification", {
+                user_id,
+                notification_message: notificationMessage,
+            });
+        } catch (err) {
+            console.error(
+                "Error inserting notification:",
+                err.response ? err.response.data : err.message
+            );
+        }
     });
 
-    // Insert the notification into the database
-    let notificationMessage = `A Event has been posted by ${senderName}`;
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/api/notification",
-        {
-          user_id,
-          notification_message: notificationMessage,
-        }
-      );
-    } catch (err) {
-      console.error(
-        "Error inserting notification:",
-        err.response ? err.response.data : err.message
-      );
-    }
+    // Handling notification for Event Drive
+    socket.on("DriveNotification", async ({ senderName, user_id }) => {
+        // Emit a notification to all clients
+        io.emit("Notification_generated", {
+            name: senderName,
+        });
 
-  });
+        // Insert the notification into the database
+        const notificationMessage = `An Event has been posted by ${senderName}`;
+        try {
+            await axios.post("http://localhost:4000/api/notification", {
+                user_id,
+                notification_message: notificationMessage,
+            });
+        } catch (err) {
+            console.error(
+                "Error inserting notification:",
+                err.response ? err.response.data : err.message
+            );
+        }
+    });
+// Handling resource booking event
+socket.on("booked_resource", async ({ resourceId, resourceName, ngoName, user_id }) => {
+  console.log(ngoName, resourceName); // Log both the NGO name and the resource name
+
+  // Emit only to the user who posted the resource
+  const posterSocketId = connectedUsers[user_id]; // Get the socket.id of the poster
+  if (posterSocketId) {
+      io.to(posterSocketId).emit("resource_booked", {
+          resourceId: resourceId,
+          resourceName: resourceName, // Include resource name in the emitted event
+          ngoName: ngoName,
+      });
+
+            // Insert a notification into the database
+            const notificationMessage = `${ngoName} has booked Resource ${resourceId}`;
+            try {
+                await axios.post("http://localhost:4000/api/notification", {
+                    user_id, // user_id of the person who posted the resource
+                    notification_message: notificationMessage,
+                });
+            } catch (err) {
+                console.error(
+                    "Error inserting notification:",
+                    err.response ? err.response.data : err.message
+                );
+            }
+        } else {
+            console.error(`User with ID ${user_id} is not connected`);
+        }
+    });
+
     socket.on("disconnect", () => {
-    console.log("Someone has left");
-  });
+        // Remove the user from the connectedUsers list when they disconnect
+        for (let userId in connectedUsers) {
+            if (connectedUsers[userId] === socket.id) {
+                console.log(`User ${userId} disconnected`);
+                delete connectedUsers[userId];
+                break; // Exit the loop once the user is found and removed
+            }
+        }
+    });
 });
+
+
 
 
 app.use(cors())
@@ -635,27 +671,38 @@ app.get("/api/resources/other", (req, res) => {
 
 // Booking resource route
 app.patch("/api/resources/book/:id", async (req, res) => {
-  const resourceId = req.params.id
+  const resourceId = req.params.id;
 
   try {
-    const updateQuery =
-      "UPDATE resource SET status = ? WHERE resource_id = ? AND status = ?"
-    const values = ["booked", resourceId, "available"]
+      // Step 1: Fetch the resource to get user_id
+      const resourceQuery = "SELECT user_id FROM resource WHERE resource_id = ?";
+      const [resourceResult] = await connection.promise().query(resourceQuery, [resourceId]);
 
-    const [result] = await connection.promise().query(updateQuery, values)
+      // Check if the resource exists
+      if (resourceResult.length === 0) {
+          return res.status(404).json({ message: "Resource not found" });
+      }
 
-    if (result.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ message: "Resource not found or already booked" })
-    }
+      const userId = resourceResult[0].user_id; // Get user_id of the person who posted the resource
 
-    res.status(200).json({ message: "Resource booked successfully" })
+      // Step 2: Update the resource status to 'booked'
+      const updateQuery = "UPDATE resource SET status = ? WHERE resource_id = ? AND status = ?";
+      const values = ["booked", resourceId, "available"];
+
+      const [updateResult] = await connection.promise().query(updateQuery, values);
+
+      // Check if the booking was successful
+      if (updateResult.affectedRows === 0) {
+          return res.status(400).json({ message: "Resource already booked" });
+      }
+
+      // Step 3: Return the user_id in the response
+      res.status(200).json({ message: "Resource booked successfully", user_id: userId });
   } catch (error) {
-    console.error("Error booking resource:", error)
-    res.status(500).json({ message: "Failed to book the resource" })
+      console.error("Error booking resource:", error);
+      res.status(500).json({ message: "Failed to book the resource" });
   }
-})
+});
 
 app.post("/api/donate", async (req, res) => {
   const { donor_id, ngo_id, donation_amount } = req.body
