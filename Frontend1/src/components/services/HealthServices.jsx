@@ -73,7 +73,7 @@ function HealthServices() {
                     ) : (
                         services.map((service) => (
                             <div key={service.service_id} className="bg-blue-100 p-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out">
-                                <h3 className="text-lg font-semibold text-gray-800">Service Type: {service.service_type}</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">Service Name: {service.service_name}</h3>
                                 <p className="text-gray-600 mb-2">Description: {service.description}</p>
                                 <p className="text-gray-500">Status: {service.status}</p>
                                 <p className="text-gray-500">Posted by: {service.user_id}</p>
