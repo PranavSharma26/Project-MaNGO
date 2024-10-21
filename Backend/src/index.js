@@ -9,6 +9,7 @@ const router = express.Router()
 import http from "http"
 import { Server } from "socket.io" // For ES Modules
 import axios from "axios" // Import axios
+import easyinvoice from "easyinvoice"
 dotenv.config()
 const app = express()
 const port = process.env.PORT || 4000
@@ -164,7 +165,6 @@ JOIN
 });
 
 
-// Book a Service
 // Book a Service
 app.post("/api/book-service/:service_id", verifyToken, (req, res) => {
   const serviceId = req.params.service_id;
@@ -808,6 +808,50 @@ app.get('/api/drives', (req, res) => {
     console.log('Fetched drives:', results); // Log the results for debugging
     res.status(200).json(results);
   });
+});
+
+
+app.post('/api/generate-invoice', async (req, res) => {
+  const { donor_id, ngo_id, donation_amount } = req.body;
+
+  // Invoice data
+  var data = {
+      apiKey: "free", // Replace with your production key if needed
+      mode: "development",
+      sender: {
+          company: "MaNGO Platform",
+          address: "Shri Govindram Seksaria Institute of Technology and Science",
+          city: "Indore",
+          country: "India"
+      },
+      client: {
+          company: `Donor ID: ${donor_id}`,
+          address: `NGO ID: ${ngo_id}`,
+      },
+      information: {
+          number: Date.now().toString(),
+          date: new Date().toLocaleDateString(),
+          dueDate: new Date().toLocaleDateString(),
+      },
+      products: [
+          { description: "Donation", price: donation_amount }
+      ],
+      bottomNotice: "Thank you for your donation!",
+      settings: {
+          currency: "INR"
+      }
+  };
+
+  try {
+      // Generate the invoice PDF
+      const result = await easyinvoice.createInvoice(data);
+
+      // Respond with the PDF file in base64
+      res.json({ pdf: result.pdf });
+  } catch (error) {
+      console.error("Error generating invoice:", error);
+      res.status(500).json({ message: "Error generating invoice" });
+  }
 });
 
 // Start the server with Socket.IO

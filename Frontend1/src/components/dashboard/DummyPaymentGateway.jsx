@@ -24,21 +24,43 @@ const DummyPaymentGateway = () => {
     return `Transaction Receipt\n\nDonor ID: ${donor_id}\nNGO ID: ${ngo_id}\nDonation Amount: Rs.${donation_amount}\nDate: ${new Date().toLocaleDateString()}\n\nThank you for your donation!`;
     };
 
-  const downloadReceipt = () => {
-    const content = receiptContent();
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "TransactionReceiptMaNGO.txt";
-    link.click();
-    URL.revokeObjectURL(url); // Clean up the URL
+  // const downloadReceipt = () => {
+  //   const content = receiptContent();
+  //   const blob = new Blob([content], { type: "text/plain" });
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.download = "TransactionReceiptMaNGO.txt";
+  //   link.click();
+  //   URL.revokeObjectURL(url); // Clean up the URL
+  
+  const downloadInvoice = async () => {
+    try {
+      const response = await axios.post('http://localhost:4000/api/generate-invoice', {
+        donor_id,
+        ngo_id,
+        donation_amount
+      });
 
-    // Redirect after downloading receipt
-    setTimeout(() => {
-      navigate('/dashboard/contributor');
-    }, 2000); // Delay for user to see the receipt being downloaded
-   };
+      // Create a blob from the base64 PDF response
+      const blob = new Blob([Uint8Array.from(atob(response.data.pdf), c => c.charCodeAt(0))], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'TransactionInvoiceMaNGO.pdf';
+      link.click();
+      URL.revokeObjectURL(url);
+
+      // Redirect after downloading the invoice
+      setTimeout(() => {
+        navigate('/dashboard/contributor');
+      }, 2000); // Delay for user to see the invoice being downloaded
+    } catch (err) {
+      console.error('Error generating invoice:', err);
+      alert('Error generating invoice');
+    }
+  };
+
     const skipDownload = () => {
         // Skip the receipt download and go to dashboard
         navigate("/dashboard/contributor");
@@ -63,7 +85,6 @@ const DummyPaymentGateway = () => {
             ngo_id,
             donation_amount,
           });
-
           console.log('Donation successful:', response.data);
           alert('Transaction Successful');
           setTimeout(() => navigate('/dashboard/contributor'), 10000); // Redirect after 10 seconds
@@ -102,7 +123,7 @@ const DummyPaymentGateway = () => {
               <div className="mb-4 flex justify-center gap-4">
                 <button
                   className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
-                  onClick={downloadReceipt}
+                  onClick={downloadInvoice}
                 >
                   Download Receipt
                 </button>
