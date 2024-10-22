@@ -9,39 +9,19 @@ function NGODashboard() {
     navigate('/post-drive');
   };
 
+  const handleViewReports = () => {
+    navigate('/view-reports'); // Navigate to the reports page
+  };
 
 
 
 
 
-
-  
 
 useEffect(() => {
   const storedToken = localStorage.getItem('token');
   setToken(storedToken); // Set the token in state
 }, []);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //   // Fetch posted services from the backend
   useEffect(() => {
     const fetchServices = async () => {
@@ -143,6 +123,52 @@ useEffect(() => {
     }
   };
 
+
+
+
+
+
+
+// Fetch user report history
+useEffect(() => {
+  const fetchReports = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/api/reports', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch reports');
+      }
+      const data = await response.json();
+      setReports(data); // Set the reports in state
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
+
+  if (token) {
+    fetchReports();
+  }
+}, [token]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen">
       <nav className="flex justify-between items-center mb-4 bg-white p-4 shadow-lg rounded-md">
@@ -155,6 +181,16 @@ useEffect(() => {
         >
           Post a Drive
         </button>
+
+        <button
+          onClick={handleViewReports}
+          className="py-2 px-6 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transform transition-all duration-300 ease-in-out"
+        >
+          View Reports
+        </button>
+
+
+
       </nav>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Section: Search Bar */}
@@ -256,6 +292,16 @@ useEffect(() => {
 }
 
 export default NGODashboard;
+
+
+
+
+
+
+
+
+
+
 
 
 
